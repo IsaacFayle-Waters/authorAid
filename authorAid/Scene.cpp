@@ -1,3 +1,4 @@
+//General functions relating to the scene. Getters/setters.
 #include "Scene.h"
 
 void Scene::setLocation(std::string location)

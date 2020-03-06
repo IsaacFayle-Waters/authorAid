@@ -7,7 +7,7 @@
 #include "Character.h"
 class Scene
 {
-	friend class Character;
+	//friend class Character;
 private:
 	std::string location;
 	std::string timeAndOrDate;
@@ -20,7 +20,7 @@ private:
 	void setSceneNumber(std::string sceneNumber);
 	*/
 public:
-	//TODO:Can be done either way, which is better, decide.
+	//TODO:Can be done either way, which is better? decide. Neater, but less maintainable?
 	void setLocation(std::string location);
 	std::string getLocation() /*{ return location; }*/;
 
