@@ -6,17 +6,25 @@
 class Character
 {
 private: 
-	std::string name = "Unknown";
-	int age = -1;
+	std::string name = "Unknown Name";
+	int age = - 1;
+	std::string description = "Unknown Character Description";
+	std::string motive = "Unknown Motive";
 public:
 	Character();
 	Character(std::string name, int age);
+	
 	void setCharacterName(std::string name);
-	std::string getName();
+	std::string getName() { return name; };
 
 	void setCharacterAge(int age);
-	int getCharacterAge();
+	int getCharacterAge() { return age; };
 
+	void setDescription(std::string description);
+	std::string getDescription() { return description; };
+
+	void setMotive(std::string motive);
+	std::string getMotive() { return motive; };
 };
 
 #endif

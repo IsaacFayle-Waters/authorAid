@@ -28,6 +28,10 @@ std::vector<Character> Scene::getCharacterList()
 {	
 	return characters;
 }
+void Scene::setGenralDescription(std::string genralDescription)
+{
+	this->genralDescription = genralDescription;
+}
 ;
 
 std::string Scene::getLocation()

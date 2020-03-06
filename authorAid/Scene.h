@@ -9,16 +9,13 @@ class Scene
 {
 	//friend class Character;
 private:
-	std::string location;
-	std::string timeAndOrDate;
-	std::string sceneName;
-	int sceneNumber;
+	std::string location = "Unkown Location";
+	std::string timeAndOrDate = "Unkown Temporal Space";
+	std::string sceneName = "Unkown Scene Name";
+	std::string genralDescription = "Unkown Scene Description";
+	int sceneNumber = -1;
 	std::vector <Character> characters;
-	/*void setLocation(std::string location);
-	void setTimeAndOrDate(std::string timeAndOrDate);
-	void setSceneName(std::string sceneName);
-	void setSceneNumber(std::string sceneNumber);
-	*/
+
 public:
 	//TODO:Can be done either way, which is better? decide. Neater, but less maintainable?
 	void setLocation(std::string location);
@@ -36,5 +33,8 @@ public:
 	void setCharacters(Character character);
 	std::vector<Character> getCharacterList();
 
+	void setGenralDescription(std::string genralDescription);
+	std::string getGeneralDescription() { return genralDescription; };
+	
 };
 #endif

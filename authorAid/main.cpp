@@ -4,6 +4,7 @@
 #include <iostream>
 #include "Scene.h"
 #include "Character.h"
+#include "narativeGeneralInfo.h"
 #include <string>
 #include <vector>
 int main() {
@@ -19,7 +20,7 @@ int main() {
 	//Tom.setCharacterName("Tom");
 
 	Tom.setCharacterAge(44);
-	std::cout << Tom.getCharacterAge();
+	//std::cout << Tom.getCharacterAge();
 	
 	//Create a scene (Uh oh!)//
 	Scene sceneOne;
@@ -32,6 +33,21 @@ int main() {
 	sceneOne.setCharacters(c2);
 	sceneOne.setCharacters(c3);
 	sceneOne.setCharacters(Tom);
+
+	//temp test
+	std::cout << "Initial description: "<<sceneOne.getGeneralDescription() << std::endl;
+	sceneOne.setGenralDescription("Really quite an awful scene. Loads of bad acting and needless violence");
+	std::cout << sceneOne.getGeneralDescription() << std::endl;
+
+	//Temp test
+	std::cout << Tom.getDescription() << std::endl;
+	Tom.setDescription("Eager to please, but rarely does");
+	std::cout << "Tom: " << Tom.getDescription() << std::endl;
+
+	//Temp test
+	std::cout << Tom.getMotive() << std::endl;
+	Tom.setMotive("To avoid Dr.Bamboo");
+	std::cout << "Tom: " << Tom.getMotive() << std::endl;
 	
 	//General Scene output
 	std::cout << 
@@ -49,6 +65,21 @@ int main() {
 			std::endl;
 	}
 	
+	std::cout << std::endl << std::endl;
+
+	NarativeGeneralInfo nar1;
+	std::cout << std::endl << nar1.getTitle();
+	std::cout << std::endl << nar1.getSetting();
+	std::cout << std::endl << nar1.getGeneralDescription();
+
+	nar1.setTitle("Bad day at Nan's");
+	nar1.setSetting("Nan's and Her Basement");
+	nar1.setGeneralDescription("Book about a murder spree by a bad Dr.");
+
+	std::cout << std::endl << nar1.getTitle();
+	std::cout << std::endl << nar1.getSetting();
+	std::cout << std::endl << nar1.getGeneralDescription();
+
 
 return 0;
 }

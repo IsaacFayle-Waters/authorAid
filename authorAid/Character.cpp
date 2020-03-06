@@ -13,16 +13,16 @@ void Character::setCharacterName(std::string name)
 	this->name = name;
 };
 
-std::string Character::getName()
-{
-	return name;
-}
 void Character::setCharacterAge(int age)
 {
 	this->age = age;
-}
-int Character::getCharacterAge()
+};
+void Character::setDescription(std::string description)
 {
-	return age;
+	this->description = description;
+}
+void Character::setMotive(std::string motive)
+{
+	this->motive = motive;
 }
 ;
