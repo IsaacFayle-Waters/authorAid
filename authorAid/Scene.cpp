@@ -1,6 +1,9 @@
 //General functions relating to the scene. Getters/setters.
 #include "Scene.h"
 
+Scene::Scene() = default;
+
+
 void Scene::setLocation(std::string location)
 {
 	this->location = location;
@@ -30,7 +33,7 @@ std::vector<Character> Scene::getCharacterList()
 }
 void Scene::setGenralDescription(std::string genralDescription)
 {
-	this->genralDescription = genralDescription;
+	this->generalDescription = genralDescription;
 }
 ;
 

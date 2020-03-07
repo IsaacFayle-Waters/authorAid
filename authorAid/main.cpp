@@ -7,6 +7,8 @@
 #include "narativeGeneralInfo.h"
 #include <string>
 #include <vector>
+
+
 int main() {
 	//Create Characters
 	Character c1;
@@ -33,7 +35,7 @@ int main() {
 	sceneOne.setCharacters(c2);
 	sceneOne.setCharacters(c3);
 	sceneOne.setCharacters(Tom);
-
+	
 	//temp test
 	std::cout << "Initial description: "<<sceneOne.getGeneralDescription() << std::endl;
 	sceneOne.setGenralDescription("Really quite an awful scene. Loads of bad acting and needless violence");

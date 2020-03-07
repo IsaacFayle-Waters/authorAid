@@ -10,7 +10,7 @@ private:
 	int age = - 1;
 	std::string description = "Unknown Character Description";
 	std::string motive = "Unknown Motive";
-public:
+public:	
 	Character();
 	Character(std::string name, int age);
 	

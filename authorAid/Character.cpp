@@ -12,7 +12,6 @@ void Character::setCharacterName(std::string name)
 {
 	this->name = name;
 };
-
 void Character::setCharacterAge(int age)
 {
 	this->age = age;
@@ -24,5 +23,4 @@ void Character::setDescription(std::string description)
 void Character::setMotive(std::string motive)
 {
 	this->motive = motive;
-}
-;
+};

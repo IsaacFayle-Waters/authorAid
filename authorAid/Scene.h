@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include "Character.h"
+
 class Scene
 {
 	//friend class Character;
@@ -12,11 +13,14 @@ private:
 	std::string location = "Unkown Location";
 	std::string timeAndOrDate = "Unkown Temporal Space";
 	std::string sceneName = "Unkown Scene Name";
-	std::string genralDescription = "Unkown Scene Description";
+	std::string generalDescription = "Unkown Scene Description";
 	int sceneNumber = -1;
 	std::vector <Character> characters;
 
 public:
+	Scene();
+	//Scene(std::string location, std::string timeAndOrDate, std::string sceneName,
+		//std::string genralDescription);
 	//TODO:Can be done either way, which is better? decide. Neater, but less maintainable?
 	void setLocation(std::string location);
 	std::string getLocation() /*{ return location; }*/;
@@ -34,7 +38,7 @@ public:
 	std::vector<Character> getCharacterList();
 
 	void setGenralDescription(std::string genralDescription);
-	std::string getGeneralDescription() { return genralDescription; };
+	std::string getGeneralDescription() { return generalDescription; };
 	
 };
 #endif
