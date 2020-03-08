@@ -3,6 +3,10 @@
 
 Scene::Scene() = default;
 
+/*Scene::Scene(std::string location, std::string timeAndOrDate, std::string sceneName, std::string genralDescription, int sceneNumber, std::vector<Character> characters)
+{
+}*/
+
 
 void Scene::setLocation(std::string location)
 {

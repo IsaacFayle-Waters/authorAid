@@ -19,9 +19,8 @@ private:
 
 public:
 	Scene();
-	//Scene(std::string location, std::string timeAndOrDate, std::string sceneName,
-		//std::string genralDescription);
-	//TODO:Can be done either way, which is better? decide. Neater, but less maintainable?
+	/*Scene(std::string location, std::string timeAndOrDate, std::string sceneName,
+		std::string genralDescription, int sceneNumber, std::vector <Character> characters);*/
 	void setLocation(std::string location);
 	std::string getLocation() /*{ return location; }*/;
 

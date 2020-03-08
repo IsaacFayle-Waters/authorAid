@@ -5,10 +5,15 @@
 #include "Scene.h"
 #include "Character.h"
 #include "narativeGeneralInfo.h"
+#include "Chapter.h"
 #include <string>
 #include <vector>
 
 
+//TODO SORT OUT Db OR JSON EARLY; CURRENT GETTERS AND SETTER RELY ON A METHOD THAT
+//WON'T BE USED LATER. Causes issues.
+
+//TODO some test functions
 int main() {
 	//Create Characters
 	Character c1;
@@ -26,6 +31,8 @@ int main() {
 	
 	//Create a scene (Uh oh!)//
 	Scene sceneOne;
+	Scene sceneTwo;
+	Scene sceneThree;
 	sceneOne.setLocation("Nans House");
 	sceneOne.setSceneName("Dr. Bamboo kills two people.");
 	sceneOne.setTimeAndOrDate("A Wednesday");
@@ -81,7 +88,19 @@ int main() {
 	std::cout << std::endl << nar1.getTitle();
 	std::cout << std::endl << nar1.getSetting();
 	std::cout << std::endl << nar1.getGeneralDescription();
+	std::cout << std::endl;
 
+	Chapter chap1;
+	chap1.setScenes(sceneOne);
+	chap1.setScenes(sceneTwo);
+	chap1.setScenes(sceneThree);
+
+	int chapSize = chap1.getSceneList().size();
+	for (int i = 0; i < chapSize; i++) {
+		std::cout << chap1.getSceneList().at(i).getSceneName() << std::endl;
+	}
+	//Access first character name, from first scene in Chapter.
+	std::cout << chap1.getSceneList().at(0).getCharacterList().at(0).getName();
 
 return 0;
 }
