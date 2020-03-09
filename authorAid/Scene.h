@@ -19,8 +19,8 @@ private:
 
 public:
 	Scene();
-	/*Scene(std::string location, std::string timeAndOrDate, std::string sceneName,
-		std::string genralDescription, int sceneNumber, std::vector <Character> characters);*/
+	Scene(std::string location, std::string timeAndOrDate, std::string sceneName,
+		std::string genralDescription, int sceneNumber);
 	void setLocation(std::string location);
 	std::string getLocation() /*{ return location; }*/;
 

@@ -9,70 +9,63 @@
 #include <string>
 #include <vector>
 
+void printSceneInfo(Scene scene);
+void printCharacterInfo(Character character);
 
 //TODO SORT OUT Db OR JSON EARLY; CURRENT GETTERS AND SETTER RELY ON A METHOD THAT
 //WON'T BE USED LATER. Causes issues.
+//Note possibly better to handle all of thisl with a matrix of some sort? 0,1?
 
 //TODO some test functions
 int main() {
 	//Create Characters
 	Character c1;
 	Character c2;
-	Character c3;
-	Character Tom;
-	//Set Their Names
+	Character c3("Dr.Bamboo", 77, "A nice old doctor, retired now. Enjoys tending to his garden.",
+		"Execution of ingrates", "Man");
+	Character Tom("Tom", 44, "Beer beast", "Create new beery world order", "bloke");
+	Character a1("Mick", 55, "Nice enough, but... ", "Stealing and love", "Chromeman");
+	Character a2("Nan", 700, "An old nan", "Getting blood out of the carpet", "Serpent");
+	//Set Some Names and ages
 	c1.setCharacterName("Mark");
-	c2.setCharacterName("Babdoo");
-	c3.setCharacterName("Dr.Bamboo");
-	//Tom.setCharacterName("Tom");
+	c1.setCharacterAge(6);
+	c1.setGender("Boy");
+	c1.setMotive("Chrisps");
 
-	Tom.setCharacterAge(44);
-	//std::cout << Tom.getCharacterAge();
+	c2.setCharacterName("Babdoo");
+	c2.setCharacterAge(13);
+	c2.setGender("Female");
+	c2.setDescription("Teenage girl");
+
 	
 	//Create a scene (Uh oh!)//
 	Scene sceneOne;
-	Scene sceneTwo;
-	Scene sceneThree;
-	sceneOne.setLocation("Nans House");
+	Scene sceneTwo("Nan's car", "A bit later", "Escape.", "Dr.Bamboo legs it", 2);
+	Scene sceneThree("Nan's Garden", "Thursday", "Conclusions in RED!", "Only one person died", 3);
+	sceneOne.setLocation("Nan's House");
 	sceneOne.setSceneName("Dr. Bamboo kills two people.");
 	sceneOne.setTimeAndOrDate("A Wednesday");
 	sceneOne.setSceneNumber(1);
+
 	//Link characters to the scene
 	sceneOne.setCharacters(c1);
 	sceneOne.setCharacters(c2);
 	sceneOne.setCharacters(c3);
 	sceneOne.setCharacters(Tom);
+	sceneOne.setCharacters(a1);
 	
-	//temp test
-	std::cout << "Initial description: "<<sceneOne.getGeneralDescription() << std::endl;
-	sceneOne.setGenralDescription("Really quite an awful scene. Loads of bad acting and needless violence");
-	std::cout << sceneOne.getGeneralDescription() << std::endl;
-
-	//Temp test
-	std::cout << Tom.getDescription() << std::endl;
-	Tom.setDescription("Eager to please, but rarely does");
-	std::cout << "Tom: " << Tom.getDescription() << std::endl;
-
-	//Temp test
-	std::cout << Tom.getMotive() << std::endl;
-	Tom.setMotive("To avoid Dr.Bamboo");
-	std::cout << "Tom: " << Tom.getMotive() << std::endl;
+	sceneTwo.setCharacters(c3);
 	
-	//General Scene output
-	std::cout << 
-		"Scene/chapter: " << sceneOne.getSceneNumber() << std::endl <<
-		"Location: " << sceneOne.getLocation() << std::endl << 
-		"Name of scene: " << sceneOne.getSceneName() << std::endl <<
-	    "Time/date/etc: " << sceneOne.getTimeAndOrDate() << std::endl;
-	//Characters displayed following being Linked to a scene
-	int numCharacters = sceneOne.getCharacterList().size();
-	for (int i = 0; i < numCharacters; i++) {
-		std::cout << 
-			"Name of Character " << i + 1 << ". " <<
-			sceneOne.getCharacterList().at(i).getName() << 
-			" Aged: " << sceneOne.getCharacterList().at(i).getCharacterAge() << 
-			std::endl;
-	}
+	sceneThree.setCharacters(a2);
+	sceneThree.setCharacters(c1);
+	sceneThree.setCharacters(c2);
+	sceneThree.setCharacters(Tom);
+
+	
+	printCharacterInfo(Tom);
+	printSceneInfo(sceneOne);
+	printSceneInfo(sceneTwo);
+	printSceneInfo(sceneThree);
 	
 	std::cout << std::endl << std::endl;
 
@@ -104,3 +97,43 @@ int main() {
 
 return 0;
 }
+
+void printSceneInfo(Scene scene)
+{
+	//General information about the scene, from Scene.
+	std::cout <<
+		"Scene: " << scene.getSceneNumber() << std::endl <<
+		"Location: " << scene.getLocation() << std::endl <<
+		"Name of scene: " << scene.getSceneName() << std::endl <<
+		"Time/date/etc: " << scene.getTimeAndOrDate() << std::endl <<
+		"What happened?: " << scene.getGeneralDescription() << std::endl;
+	
+	//Characters displayed following being Linked to a scene
+	std::cout << "\nCharacters who apear in this scene:\n\n";
+	int numCharacters = scene.getCharacterList().size();
+	if (numCharacters != 0) {
+		for (int i = 0; i < numCharacters; i++) {
+			std::cout <<
+				"Name of Character " << i + 1 << ": " <<
+				scene.getCharacterList().at(i).getName() <<
+				" Aged: " << scene.getCharacterList().at(i).getCharacterAge() << std::endl <<
+				"\nWho can be described as: " << scene.getCharacterList().at(i).getDescription() << std::endl <<
+				"Who's motive seems to be: " <<scene.getCharacterList().at(i).getMotive() << std::endl <<
+				scene.getCharacterList().at(i).getName() << " is a " << scene.getCharacterList().at(i).getGender() <<
+				std::endl << std::endl;
+		}
+	}
+	else {
+		std::cout << "No characters in this Scene." << std::endl;
+	}
+}
+
+void printCharacterInfo(Character character)
+{
+	std::cout << character.getName() << "'s details." << std::endl <<
+		"Age: " << character.getCharacterAge() << std::endl <<
+		"Description:  " << character.getDescription() << std::endl <<
+		"Motive: " << character.getMotive() << std::endl <<
+		"Gender: " << character.getGender() << std::endl << std::endl;
+}
+

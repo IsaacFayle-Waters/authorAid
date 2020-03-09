@@ -2,6 +2,7 @@
 //General description of a narrative. 
 //Little more that what would be found on Amazon
 //for example.
+//UNTESTED, BUT SIMPLE.
 #ifndef NARATIVE_GEN_INFO_H
 #define NARATIVE_GEN_INFO_H
 #include <string>

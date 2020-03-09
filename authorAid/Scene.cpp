@@ -2,10 +2,14 @@
 #include "Scene.h"
 
 Scene::Scene() = default;
-
-/*Scene::Scene(std::string location, std::string timeAndOrDate, std::string sceneName, std::string genralDescription, int sceneNumber, std::vector<Character> characters)
+Scene::Scene(std::string location, std::string timeAndOrDate, std::string sceneName, std::string genralDescription, int sceneNumber)
 {
-}*/
+	setLocation(location);
+	setTimeAndOrDate(timeAndOrDate);
+	setSceneName(sceneName);
+	setGenralDescription(genralDescription);
+	setSceneNumber(sceneNumber);
+}
 
 
 void Scene::setLocation(std::string location)

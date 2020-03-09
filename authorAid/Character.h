@@ -10,9 +10,11 @@ private:
 	int age = - 1;
 	std::string description = "Unknown Character Description";
 	std::string motive = "Unknown Motive";
+	std::string gender = "Unknown Gender";
 public:	
 	Character();
-	Character(std::string name, int age);
+	Character(std::string name, int age, std::string description, 
+				std::string motive, std::string gender);
 	
 	void setCharacterName(std::string name);
 	std::string getName() { return name; };
@@ -25,6 +27,9 @@ public:
 
 	void setMotive(std::string motive);
 	std::string getMotive() { return motive; };
+
+	void setGender(std::string gender);
+	std::string getGender() { return gender; };
 };
 
 #endif

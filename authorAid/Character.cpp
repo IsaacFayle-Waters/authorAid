@@ -2,11 +2,14 @@
 #include "Character.h"
 
 Character::Character() = default;
-//Charcater name intitially unknown
-Character::Character(std::string name = "Unknown", int age = NULL)
+Character::Character(std::string name, int age, std::string description,
+	std::string motive, std::string gender)
 {
 	setCharacterName(name);
 	setCharacterAge(age);
+	setDescription(description);
+	setMotive(motive);
+	setGender(gender);
 };
 void Character::setCharacterName(std::string name)
 {
@@ -23,4 +26,9 @@ void Character::setDescription(std::string description)
 void Character::setMotive(std::string motive)
 {
 	this->motive = motive;
-};
+}
+void Character::setGender(std::string gender)
+{
+	this->gender = gender;
+}
+;
