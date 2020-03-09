@@ -11,6 +11,7 @@ private:
 	std::string description = "Unknown Character Description";
 	std::string motive = "Unknown Motive";
 	std::string gender = "Unknown Gender";
+	std::string notes = "No notes";
 public:	
 	Character();
 	Character(std::string name, int age, std::string description, 
@@ -30,6 +31,9 @@ public:
 
 	void setGender(std::string gender);
 	std::string getGender() { return gender; };
+	
+	void setNotes(std::string notes);
+	std::string getNotes() { return notes; };
 };
 
 #endif

@@ -1,8 +1,7 @@
+//Acts to bind all chapters in a narrative with a few general details
+//Of the story. In this way, it allows more than one story 
+//in a particular world.
 #pragma once
-//General description of a narrative. 
-//Little more that what would be found on Amazon
-//for example.
-//UNTESTED, BUT SIMPLE.
 #ifndef NARATIVE_GEN_INFO_H
 #define NARATIVE_GEN_INFO_H
 #include <string>

@@ -31,4 +31,8 @@ void Character::setGender(std::string gender)
 {
 	this->gender = gender;
 }
+void Character::setNotes(std::string notes)
+{
+	this->notes = notes;
+}
 ;

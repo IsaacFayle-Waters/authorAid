@@ -9,14 +9,14 @@
 #include <string>
 #include <vector>
 
-void printSceneInfo(Scene scene);
+void printSceneInfo(Scene scene, bool charInfoOn);
 void printCharacterInfo(Character character);
+void printNarativeGeneralInfo(NarativeGeneralInfo ngi);
 
 //TODO SORT OUT Db OR JSON EARLY; CURRENT GETTERS AND SETTER RELY ON A METHOD THAT
 //WON'T BE USED LATER. Causes issues.
 //Note possibly better to handle all of thisl with a matrix of some sort? 0,1?
 
-//TODO some test functions
 int main() {
 	//Create Characters
 	Character c1;
@@ -26,6 +26,7 @@ int main() {
 	Character Tom("Tom", 44, "Beer beast", "Create new beery world order", "bloke");
 	Character a1("Mick", 55, "Nice enough, but... ", "Stealing and love", "Chromeman");
 	Character a2("Nan", 700, "An old nan", "Getting blood out of the carpet", "Serpent");
+	
 	//Set Some Names and ages
 	c1.setCharacterName("Mark");
 	c1.setCharacterAge(6);
@@ -37,17 +38,22 @@ int main() {
 	c2.setGender("Female");
 	c2.setDescription("Teenage girl");
 
-	
-	//Create a scene (Uh oh!)//
+	//evidence 'notes' working.
+	a1.setNotes("Always, he gets into the fighting on tarmac over beer.\n"
+		"'Why are you like this?' is the sort of thing his wife asks.\n"
+		"'My Dyspraxia drives me to it, NOW LEAVE ME!' would be a typical reply.");
+
+	//Creating scenes (Uh oh!)
 	Scene sceneOne;
 	Scene sceneTwo("Nan's car", "A bit later", "Escape.", "Dr.Bamboo legs it", 2);
 	Scene sceneThree("Nan's Garden", "Thursday", "Conclusions in RED!", "Only one person died", 3);
+	sceneThree.setNotes("This is not the end.");
 	sceneOne.setLocation("Nan's House");
 	sceneOne.setSceneName("Dr. Bamboo kills two people.");
 	sceneOne.setTimeAndOrDate("A Wednesday");
 	sceneOne.setSceneNumber(1);
 
-	//Link characters to the scene
+	//Link characters to the scenes
 	sceneOne.setCharacters(c1);
 	sceneOne.setCharacters(c2);
 	sceneOne.setCharacters(c3);
@@ -61,28 +67,22 @@ int main() {
 	sceneThree.setCharacters(c2);
 	sceneThree.setCharacters(Tom);
 
-	
-	printCharacterInfo(Tom);
-	printSceneInfo(sceneOne);
-	printSceneInfo(sceneTwo);
-	printSceneInfo(sceneThree);
-	
-	std::cout << std::endl << std::endl;
-
+	//Set Narrative General Info
 	NarativeGeneralInfo nar1;
-	std::cout << std::endl << nar1.getTitle();
-	std::cout << std::endl << nar1.getSetting();
-	std::cout << std::endl << nar1.getGeneralDescription();
-
 	nar1.setTitle("Bad day at Nan's");
-	nar1.setSetting("Nan's and Her Basement");
+	nar1.setSetting("Nan's house, car, and garden");
+	nar1.setGenre("Romance");
 	nar1.setGeneralDescription("Book about a murder spree by a bad Dr.");
 
-	std::cout << std::endl << nar1.getTitle();
-	std::cout << std::endl << nar1.getSetting();
-	std::cout << std::endl << nar1.getGeneralDescription();
-	std::cout << std::endl;
-
+	//Display Scenes, demonstrate character attributes, display 
+	//Narrative info
+	printNarativeGeneralInfo(nar1);
+	printCharacterInfo(a1);
+	printSceneInfo(sceneOne,false);
+	printSceneInfo(sceneTwo,false);
+	printSceneInfo(sceneThree,false);
+	
+	//Chapter
 	Chapter chap1;
 	chap1.setScenes(sceneOne);
 	chap1.setScenes(sceneTwo);
@@ -98,7 +98,7 @@ int main() {
 return 0;
 }
 
-void printSceneInfo(Scene scene)
+void printSceneInfo(Scene scene, bool charInfoOn)
 {
 	//General information about the scene, from Scene.
 	std::cout <<
@@ -106,26 +106,29 @@ void printSceneInfo(Scene scene)
 		"Location: " << scene.getLocation() << std::endl <<
 		"Name of scene: " << scene.getSceneName() << std::endl <<
 		"Time/date/etc: " << scene.getTimeAndOrDate() << std::endl <<
-		"What happened?: " << scene.getGeneralDescription() << std::endl;
-	
+		"What happened?: " << scene.getGeneralDescription() << std::endl <<
+		"Notes: " << scene.getNotes() << std::endl << std::endl;
 	//Characters displayed following being Linked to a scene
-	std::cout << "\nCharacters who apear in this scene:\n\n";
-	int numCharacters = scene.getCharacterList().size();
-	if (numCharacters != 0) {
-		for (int i = 0; i < numCharacters; i++) {
-			std::cout <<
-				"Name of Character " << i + 1 << ": " <<
-				scene.getCharacterList().at(i).getName() <<
-				" Aged: " << scene.getCharacterList().at(i).getCharacterAge() << std::endl <<
-				"\nWho can be described as: " << scene.getCharacterList().at(i).getDescription() << std::endl <<
-				"Who's motive seems to be: " <<scene.getCharacterList().at(i).getMotive() << std::endl <<
-				scene.getCharacterList().at(i).getName() << " is a " << scene.getCharacterList().at(i).getGender() <<
-				std::endl << std::endl;
+	if (charInfoOn == true) {
+		std::cout << "\nCharacters who apear in this scene:\n\n";
+		int numCharacters = scene.getCharacterList().size();
+		if (numCharacters != 0) {
+			for (int i = 0; i < numCharacters; i++) {
+				std::cout <<
+					"Name of Character " << i + 1 << ": " <<
+					scene.getCharacterList().at(i).getName() <<
+					" Aged: " << scene.getCharacterList().at(i).getCharacterAge() << std::endl <<
+					"\nWho can be described as: " << scene.getCharacterList().at(i).getDescription() << std::endl <<
+					"Who's motive seems to be: " << scene.getCharacterList().at(i).getMotive() << std::endl <<
+					scene.getCharacterList().at(i).getName() << " is a " << scene.getCharacterList().at(i).getGender() <<
+					std::endl << std::endl;
+			}
+		}
+		else {
+			std::cout << "No characters in this Scene." << std::endl;
 		}
 	}
-	else {
-		std::cout << "No characters in this Scene." << std::endl;
-	}
+	else { /*nothing*/ }
 }
 
 void printCharacterInfo(Character character)
@@ -134,6 +137,18 @@ void printCharacterInfo(Character character)
 		"Age: " << character.getCharacterAge() << std::endl <<
 		"Description:  " << character.getDescription() << std::endl <<
 		"Motive: " << character.getMotive() << std::endl <<
-		"Gender: " << character.getGender() << std::endl << std::endl;
+		"Gender: " << character.getGender() << std::endl << 
+		"Notes: " << character.getNotes() << std::endl << std::endl;
+}
+
+void printNarativeGeneralInfo(NarativeGeneralInfo ngi)
+{
+	std::cout << "Title: ";
+	std::cout << ngi.getTitle() << std::endl;
+	std::cout << "Setting: ";
+	std::cout << ngi.getSetting() << std::endl;
+	std::cout << "Description: ";
+	std::cout << ngi.getGeneralDescription();
+	std::cout << std::endl << std::endl;
 }
 
