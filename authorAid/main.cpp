@@ -11,10 +11,11 @@
 
 void printSceneInfo(Scene scene, bool charInfoOn);
 void printCharacterInfo(Character character);
+void printChapterInfo(Chapter chapter);
 void printNarativeGeneralInfo(NarativeGeneralInfo ngi);
 
-//TODO SORT OUT Db OR JSON EARLY; CURRENT GETTERS AND SETTER RELY ON A METHOD THAT
-//WON'T BE USED LATER. Causes issues.
+//TODO SORT OUT Db, sql, JSON EARLY.
+//TODO GUI
 //Note possibly better to handle all of thisl with a matrix of some sort? 0,1?
 
 int main() {
@@ -67,6 +68,14 @@ int main() {
 	sceneThree.setCharacters(c2);
 	sceneThree.setCharacters(Tom);
 
+	//Chapters 
+	Chapter chap1(1);
+	Chapter chap2(2);
+	chap1.setScenes(sceneOne);
+	chap1.setScenes(sceneTwo);
+	chap1.setScenes(sceneThree);
+	//chap2.setScenes(sceneOne);
+
 	//Set Narrative General Info
 	NarativeGeneralInfo nar1;
 	nar1.setTitle("Bad day at Nan's");
@@ -80,21 +89,10 @@ int main() {
 	printCharacterInfo(a1);
 	printSceneInfo(sceneOne,false);
 	printSceneInfo(sceneTwo,false);
-	printSceneInfo(sceneThree,false);
+	printSceneInfo(sceneThree,false);	
+	printChapterInfo(chap2);
+
 	
-	//Chapter
-	Chapter chap1;
-	chap1.setScenes(sceneOne);
-	chap1.setScenes(sceneTwo);
-	chap1.setScenes(sceneThree);
-
-	int chapSize = chap1.getSceneList().size();
-	for (int i = 0; i < chapSize; i++) {
-		std::cout << chap1.getSceneList().at(i).getSceneName() << std::endl;
-	}
-	//Access first character name, from first scene in Chapter.
-	std::cout << chap1.getSceneList().at(0).getCharacterList().at(0).getName();
-
 return 0;
 }
 
@@ -110,7 +108,7 @@ void printSceneInfo(Scene scene, bool charInfoOn)
 		"Notes: " << scene.getNotes() << std::endl << std::endl;
 	//Characters displayed following being Linked to a scene
 	if (charInfoOn == true) {
-		std::cout << "\nCharacters who apear in this scene:\n\n";
+		std::cout << "\nCharacters who apeer in this scene:\n\n";
 		int numCharacters = scene.getCharacterList().size();
 		if (numCharacters != 0) {
 			for (int i = 0; i < numCharacters; i++) {
@@ -139,6 +137,26 @@ void printCharacterInfo(Character character)
 		"Motive: " << character.getMotive() << std::endl <<
 		"Gender: " << character.getGender() << std::endl << 
 		"Notes: " << character.getNotes() << std::endl << std::endl;
+}
+
+void printChapterInfo(Chapter chapter)
+{   //Number of scenes
+	std::cout << "Chapter No: " << chapter.getChapterNumber() << std::endl;
+	std::cout << "Scenes in Chapter: " << chapter.getNumberOfScenes() << std::endl;
+	int chapSize = chapter.getSceneList().size();
+	if (chapSize != 0) {
+		for (int i = 0; i < chapSize; i++) {
+			std::cout << "Scene " << i + 1 << ": ";
+			std::cout << chapter.getSceneList().at(i).getSceneName() << std::endl;
+		}
+		std::cout << std::endl;
+		//Access first character name, from first scene in Chapter.
+		std::cout << "Name of first character from first scene: "
+			<< chapter.getSceneList().at(0).getCharacterList().at(0).getName();
+
+	}
+	else { std::cout << "No Scenes to display"; }
+	std::cout << std::endl;
 }
 
 void printNarativeGeneralInfo(NarativeGeneralInfo ngi)

@@ -5,6 +5,8 @@
 #ifndef NARATIVE_GEN_INFO_H
 #define NARATIVE_GEN_INFO_H
 #include <string>
+#include <vector>
+#include "Chapter.h"
 class NarativeGeneralInfo
 {
 private:
@@ -12,7 +14,7 @@ private:
     std::string setting = "Unkown Setting";
     std::string genre = "Unkown Genre";
     std::string genralDescription = "Unkown Narative Description";
-    //List of Chapters// so chapter class to?
+    std::vector <Chapter> chapter;
     //array of Other characters linked to 'this' character. Possibly
 public:
     void setTitle(std::string title);
@@ -26,6 +28,9 @@ public:
 
     void setGeneralDescription(std::string generalDescription);
     std::string getGeneralDescription() { return genralDescription; };
+
+    void setChapter(Chapter chapter);
+    std::vector<Chapter> getChapters();
 
 };
 

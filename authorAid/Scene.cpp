@@ -14,7 +14,6 @@ Scene::Scene(std::string location, std::string timeAndOrDate,
 	
 };
 
-
 void Scene::setLocation(std::string location)
 {
 	this->location = location;

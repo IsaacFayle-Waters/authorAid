@@ -16,4 +16,12 @@ void NarativeGeneralInfo::setGeneralDescription(std::string generalDescription)
 {
 	this->genralDescription = generalDescription;
 }
+void NarativeGeneralInfo::setChapter(Chapter chapter)
+{
+	this->chapter.push_back(chapter);
+}
+std::vector<Chapter> NarativeGeneralInfo::getChapters()
+{
+	return chapter;
+}
 ;
