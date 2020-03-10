@@ -2,15 +2,21 @@
 
 Chapter::Chapter() = default;
 
-Chapter::Chapter(int chapterNumber)
+Chapter::Chapter(int chapterNumber, std::string chapterName)
 {
 	setChapterNumber(chapterNumber);
+	setChapterName(chapterName);
 }
 
 
 void Chapter::setChapterNumber(int chapterNumber)
 {
 	this->chapterNumber = chapterNumber;
+}
+
+void Chapter::setChapterName(std::string chapterName)
+{
+	this->chapterName = chapterName;
 }
 
 void Chapter::setScenes(Scene scenes)

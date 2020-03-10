@@ -41,6 +41,7 @@ void Scene::setSceneNumber(int sceneNumber)
 void Scene::setCharacters(Character character)
 {
 	this->characters.push_back(character);
+	this->numberOfCharacters += 1;
 };
 std::vector<Character> Scene::getCharacterList()
 {	

@@ -33,21 +33,25 @@ int main() {
 	c1.setCharacterAge(6);
 	c1.setGender("Boy");
 	c1.setMotive("Chrisps");
-
 	c2.setCharacterName("Babdoo");
 	c2.setCharacterAge(13);
 	c2.setGender("Female");
 	c2.setDescription("Teenage girl");
 
-	//evidence 'notes' working.
+	//Evidence 'notes' working.
 	a1.setNotes("Always, he gets into the fighting on tarmac over beer.\n"
 		"'Why are you like this?' is the sort of thing his wife asks.\n"
 		"'My Dyspraxia drives me to it, NOW LEAVE ME!' would be a typical reply.");
-
+	
 	//Creating scenes (Uh oh!)
 	Scene sceneOne;
 	Scene sceneTwo("Nan's car", "A bit later", "Escape.", "Dr.Bamboo legs it", 2);
 	Scene sceneThree("Nan's Garden", "Thursday", "Conclusions in RED!", "Only one person died", 3);
+	Scene sceneFour("Hell", "No!", "Dr Dr Dr", "dsgGGGGGfyes", 4);
+	Scene sceneFive("Nan's House", "Friday", "End now", "Nan is watching TV, in her chair", 5);
+	sceneFive.setCharacters(a2);
+	sceneFive.setCharacters(c1);
+	sceneFive.setNotes("Nan is pleased with her week. Everything went as she had hoped, and now the one show is on.");
 	sceneThree.setNotes("This is not the end.");
 	sceneOne.setLocation("Nan's House");
 	sceneOne.setSceneName("Dr. Bamboo kills two people.");
@@ -60,37 +64,50 @@ int main() {
 	sceneOne.setCharacters(c3);
 	sceneOne.setCharacters(Tom);
 	sceneOne.setCharacters(a1);
-	
 	sceneTwo.setCharacters(c3);
-	
 	sceneThree.setCharacters(a2);
 	sceneThree.setCharacters(c1);
 	sceneThree.setCharacters(c2);
 	sceneThree.setCharacters(Tom);
 
 	//Chapters 
-	Chapter chap1(1);
-	Chapter chap2(2);
+	Chapter chap1(1,"Etchings of FEAR!");
+	Chapter chap2(2, "Epilogue... OF FEAR!");
 	chap1.setScenes(sceneOne);
 	chap1.setScenes(sceneTwo);
 	chap1.setScenes(sceneThree);
-	//chap2.setScenes(sceneOne);
+	chap2.setScenes(sceneFour);
+	chap2.setScenes(sceneFive);
 
 	//Set Narrative General Info
-	NarativeGeneralInfo nar1;
-	nar1.setTitle("Bad day at Nan's");
-	nar1.setSetting("Nan's house, car, and garden");
-	nar1.setGenre("Romance");
-	nar1.setGeneralDescription("Book about a murder spree by a bad Dr.");
+	NarativeGeneralInfo ngi1;
+	NarativeGeneralInfo ngi2;
+	ngi1.setTitle("Bad day at Nan's");
+	ngi1.setSetting("Nan's house, car, and garden");
+	ngi1.setGenre("Romance");
+	ngi1.setGeneralDescription("Book about a murder spree by a bad Dr.");
 
-	//Display Scenes, demonstrate character attributes, display 
-	//Narrative info
-	printNarativeGeneralInfo(nar1);
-	printCharacterInfo(a1);
+	//Include chapters
+	ngi1.setChapter(chap1);
+	ngi1.setChapter(chap2);
+
+	//Display Narrative info, Chapters, Scenes, and a character.
+	printNarativeGeneralInfo(ngi1);
+
+	printChapterInfo(chap1);
+
 	printSceneInfo(sceneOne,false);
-	printSceneInfo(sceneTwo,false);
-	printSceneInfo(sceneThree,false);	
+	printSceneInfo(sceneTwo,true);
+	printSceneInfo(sceneThree,false);
+
 	printChapterInfo(chap2);
+	printSceneInfo(sceneFour, false);
+	printSceneInfo(sceneFive, true);
+	
+	printCharacterInfo(a1);
+	//Example of value passing through classes
+	printNarativeGeneralInfo(ngi2);
+	
 
 	
 return 0;
@@ -102,13 +119,14 @@ void printSceneInfo(Scene scene, bool charInfoOn)
 	std::cout <<
 		"Scene: " << scene.getSceneNumber() << std::endl <<
 		"Location: " << scene.getLocation() << std::endl <<
+		"Number of Characters: " << scene.getNumberOfCharacters() << std::endl <<
 		"Name of scene: " << scene.getSceneName() << std::endl <<
 		"Time/date/etc: " << scene.getTimeAndOrDate() << std::endl <<
 		"What happened?: " << scene.getGeneralDescription() << std::endl <<
 		"Notes: " << scene.getNotes() << std::endl << std::endl;
 	//Characters displayed following being Linked to a scene
 	if (charInfoOn == true) {
-		std::cout << "\nCharacters who apeer in this scene:\n\n";
+		std::cout << "Characters who apeer in this scene:\n\n";
 		int numCharacters = scene.getCharacterList().size();
 		if (numCharacters != 0) {
 			for (int i = 0; i < numCharacters; i++) {
@@ -123,8 +141,8 @@ void printSceneInfo(Scene scene, bool charInfoOn)
 			}
 		}
 		else {
-			std::cout << "No characters in this Scene." << std::endl;
-		}
+			std::cout << "No characters in this Scene." << std::endl << std::endl;
+		} 
 	}
 	else { /*nothing*/ }
 }
@@ -146,14 +164,17 @@ void printChapterInfo(Chapter chapter)
 	int chapSize = chapter.getSceneList().size();
 	if (chapSize != 0) {
 		for (int i = 0; i < chapSize; i++) {
-			std::cout << "Scene " << i + 1 << ": ";
+			std::cout << i + 1 << ": ";
 			std::cout << chapter.getSceneList().at(i).getSceneName() << std::endl;
 		}
 		std::cout << std::endl;
 		//Access first character name, from first scene in Chapter.
-		std::cout << "Name of first character from first scene: "
-			<< chapter.getSceneList().at(0).getCharacterList().at(0).getName();
-
+		if (chapter.getSceneList().at(0).getCharacterList().size() != 0) {
+			std::cout << "The name of the first character from the first scene is "
+				<< chapter.getSceneList().at(0).getCharacterList().at(0).getName() <<
+				", taken from character class via scene class." << std::endl;
+		}
+		else {/*Do nothing*/ }
 	}
 	else { std::cout << "No Scenes to display"; }
 	std::cout << std::endl;
@@ -166,7 +187,23 @@ void printNarativeGeneralInfo(NarativeGeneralInfo ngi)
 	std::cout << "Setting: ";
 	std::cout << ngi.getSetting() << std::endl;
 	std::cout << "Description: ";
-	std::cout << ngi.getGeneralDescription();
+	std::cout << ngi.getGeneralDescription() << std::endl;
+	std::cout << "Number of Chapters: ";
+	std::cout << ngi.getNumberOfChapters();
 	std::cout << std::endl << std::endl;
+	//Display Chapter Names and Numbers
+	int narSize = ngi.getChapters().size();
+	if (narSize != 0) {
+		for (int k = 0; k < narSize; k++) {
+			if (ngi.getChapters().at(k).getChapterName() != "") {
+				std::cout << "Chapter ";
+				std::cout << ngi.getChapters().at(k).getChapterNumber() << " :";
+				std::cout << ngi.getChapters().at(k).getChapterName() << std::endl;
+			}
+			else{/*Do Nothing*/ }
+		}
+		std::cout << std::endl;
+	}
+	else { std::cout << "No chapters to display" << std::endl; }
 }
 

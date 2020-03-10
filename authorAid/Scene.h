@@ -18,6 +18,7 @@ private:
 	std::string notes = "No notes";
 	int sceneNumber = -1;
 	std::vector <Character> characters;
+	int numberOfCharacters = 0;
 
 public:
 	Scene();
@@ -44,5 +45,6 @@ public:
 	void setGenralDescription(std::string genralDescription);
 	std::string getGeneralDescription() { return generalDescription; };
 	
+	int getNumberOfCharacters() { return numberOfCharacters; };
 };
 #endif

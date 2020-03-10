@@ -1,5 +1,16 @@
 #include "narativeGeneralInfo.h"
 
+NarativeGeneralInfo::NarativeGeneralInfo() = default;
+
+NarativeGeneralInfo::NarativeGeneralInfo(std::string title, std::string setting, std::string genre, std::string genralDescription)
+{
+	setTitle(title);
+	setSetting(setting);
+	setGenre(genre);
+	setGeneralDescription(genralDescription);
+}
+
+
 void NarativeGeneralInfo::setTitle(std::string title)
 {
 	this->title = title;
@@ -19,6 +30,7 @@ void NarativeGeneralInfo::setGeneralDescription(std::string generalDescription)
 void NarativeGeneralInfo::setChapter(Chapter chapter)
 {
 	this->chapter.push_back(chapter);
+	this->numberOfChapters += 1;
 }
 std::vector<Chapter> NarativeGeneralInfo::getChapters()
 {
