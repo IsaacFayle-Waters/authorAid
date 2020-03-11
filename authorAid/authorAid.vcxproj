@@ -150,6 +150,7 @@
   <ItemGroup>
     <ClCompile Include="Chapter.cpp" />
     <ClCompile Include="Character.cpp" />
+    <ClCompile Include="dbInteract.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="narativeGeneralInfo.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -158,6 +159,7 @@
   <ItemGroup>
     <ClInclude Include="Chapter.h" />
     <ClInclude Include="Character.h" />
+    <ClInclude Include="dbInteract.h" />
     <ClInclude Include="narativeGeneralInfo.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Universe.h" />

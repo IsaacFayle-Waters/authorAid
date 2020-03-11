@@ -2,31 +2,42 @@
 //a user may just feel like jotting down some details about a character, but not know their name, age, 
 //or what story the character belongs to yet. Similarly a scene may be imagine, without characters, etc. 
 #include <iostream>
+#include <stdio.h>
+#include <string>
+#include <vector>
+#include <sqlite3.h>
+
 #include "Scene.h"
 #include "Character.h"
 #include "narativeGeneralInfo.h"
 #include "Chapter.h"
-#include <string>
-#include <vector>
+#include "dbInteract.h"
 
-//#include <winsqlite/winsqlite3.h>
-//#include <winsqlite/winsqlite3ext.h>
-//#include <c:\sqlite\sqlite-dlls\sqlite3.h>
-#include <sqlite3.h>
 
 void printSceneInfo(Scene scene, bool charInfoOn);
 void printCharacterInfo(Character character);
 void printChapterInfo(Chapter chapter);
 void printNarativeGeneralInfo(NarativeGeneralInfo ngi);
+int callback(void* data, int argc, char** argv, char** azColName);
 
 //
 //TODO SORT OUT Db. Connected, now need to write to and then read from it.
-//Use example data to effect writing via sql. 
+//Use example data to effect writing via sqlite. 
 //TODO finish creating tables
 //TODO GUI
 
 int main(int argc, char** argv) {
+	
+	
+	
+	//Create db instance
 	sqlite3 *db;
+
+	// Save error messages
+	char* errMsg = 0;
+
+	std::string sql;
+	int rc;
 	
 	int exit = 0;
 	exit = sqlite3_open("example.db", &db);
@@ -38,6 +49,23 @@ int main(int argc, char** argv) {
 	else {
 		std::cout << "Opened Database Successfully!" << std::endl;
 	}
+
+	std::string query = queryAllFieldsTable("CHARACTER");
+	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
+
+	
+	
+	//sql = tableBaseCreate();
+	sql = ("INSERT INTO CHARACTER VALUES(1, 'MICK',34, 'A prize plumb', 'gaaaannns', 'Goose', 'Everyone knows; Micks better off off the sauce');"
+		"INSERT INTO CHARACTER VALUES(2, 'Dorchka',22,'Well liked, but very sad', 'The hope that she will see her mother again', 'Woman','No notes.');");
+		
+	exit = sqlite3_exec(db, sql.c_str(), callback,0, &errMsg);
+
+	if (exit != SQLITE_OK) {
+		std::cerr << "Error Insert" << std::endl;
+		sqlite3_free(errMsg);
+	}
+	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
 	sqlite3_close(db);
 	
 	//Create Characters
@@ -133,6 +161,19 @@ int main(int argc, char** argv) {
 	
 return 0;
 }
+
+int callback(void* data, int argc, char** argv, char** azColName) { 
+	
+	int i;
+	fprintf(stderr, "%s: ", (const char*)data);
+
+	for (i = 0; i < argc; i++) {
+		printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+	}
+
+	printf("\n");
+	
+	return 0; }
 
 void printSceneInfo(Scene scene, bool charInfoOn)
 {
