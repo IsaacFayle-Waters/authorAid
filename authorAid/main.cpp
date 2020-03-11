@@ -9,16 +9,37 @@
 #include <string>
 #include <vector>
 
+//#include <winsqlite/winsqlite3.h>
+//#include <winsqlite/winsqlite3ext.h>
+//#include <c:\sqlite\sqlite-dlls\sqlite3.h>
+#include <sqlite3.h>
+
 void printSceneInfo(Scene scene, bool charInfoOn);
 void printCharacterInfo(Character character);
 void printChapterInfo(Chapter chapter);
 void printNarativeGeneralInfo(NarativeGeneralInfo ngi);
 
-//TODO SORT OUT Db, sql, JSON EARLY.
+//
+//TODO SORT OUT Db. Connected, now need to write to and then read from it.
+//Use example data to effect writing via sql. 
+//TODO finish creating tables
 //TODO GUI
-//Note possibly better to handle all of thisl with a matrix of some sort? 0,1?
 
-int main() {
+int main(int argc, char** argv) {
+	sqlite3 *db;
+	
+	int exit = 0;
+	exit = sqlite3_open("example.db", &db);
+
+	if (exit) {
+		std::cerr << "Error open db" << sqlite3_errmsg(db) << std::endl;
+		return(-1);
+	}
+	else {
+		std::cout << "Opened Database Successfully!" << std::endl;
+	}
+	sqlite3_close(db);
+	
 	//Create Characters
 	Character c1;
 	Character c2;
