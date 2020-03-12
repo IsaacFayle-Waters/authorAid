@@ -9,6 +9,7 @@ private:
 	std::string chapterName = "";
 	std::vector <Scene> scenes;
 	int numberOfScenes = 0;
+	std::string notes = "No notes";
 
 public:
 	Chapter();
@@ -24,5 +25,8 @@ public:
 	std::vector<Scene> getSceneList();
 
 	int getNumberOfScenes() { return numberOfScenes; };
+	
+	void setNotes(std::string notes);
+	std::string getNotes() { return notes; };
 };
 

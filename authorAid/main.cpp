@@ -1,6 +1,8 @@
-//The aim is to build a flexible app that alows a user to freely keep track of their creations. For example,
+//The aim is to build a flexible app that alows a user to freely keep track of their written creations. For example,
 //a user may just feel like jotting down some details about a character, but not know their name, age, 
-//or what story the character belongs to yet. Similarly a scene may be imagine, without characters, etc. 
+//or what story the character belongs to yet. Similarly a scene may be imagined without characters, etc.
+//
+//On the other had the user should have a sturdy framework to work with if they so choose.
 #include <iostream>
 #include <stdio.h>
 #include <string>
@@ -27,21 +29,19 @@ int callback(void* data, int argc, char** argv, char** azColName);
 //TODO GUI
 
 int main(int argc, char** argv) {
-	
-	
-	
+	std::string drop = dropT("CHARACTER");
+	std::cout << drop << std::endl;
 	//Create db instance
 	sqlite3 *db;
-
 	// Save error messages
 	char* errMsg = 0;
-
-	std::string sql;
-	int rc;
-	
+	//SQL string for query and entry.
+	//std::string sql;
+	//exit deals with sqlite read and write	
 	int exit = 0;
+	//Open db
 	exit = sqlite3_open("example.db", &db);
-
+	//Test Connection
 	if (exit) {
 		std::cerr << "Error open db" << sqlite3_errmsg(db) << std::endl;
 		return(-1);
@@ -49,24 +49,19 @@ int main(int argc, char** argv) {
 	else {
 		std::cout << "Opened Database Successfully!" << std::endl;
 	}
-
+	//query string and db interaction. 
 	std::string query = queryAllFieldsTable("CHARACTER");
-	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
-
-	
-	
-	//sql = tableBaseCreate();
-	sql = ("INSERT INTO CHARACTER VALUES(1, 'MICK',34, 'A prize plumb', 'gaaaannns', 'Goose', 'Everyone knows; Micks better off off the sauce');"
-		"INSERT INTO CHARACTER VALUES(2, 'Dorchka',22,'Well liked, but very sad', 'The hope that she will see her mother again', 'Woman','No notes.');");
-		
+	//exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
+	std::string sql = (tableBaseCreate());
+   //WRITE to db	
 	exit = sqlite3_exec(db, sql.c_str(), callback,0, &errMsg);
-
+	/*exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
 	if (exit != SQLITE_OK) {
 		std::cerr << "Error Insert" << std::endl;
 		sqlite3_free(errMsg);
 	}
-	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
-	sqlite3_close(db);
+	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL); */
+	//sqlite3_close(db);
 	
 	//Create Characters
 	Character c1;
@@ -76,7 +71,17 @@ int main(int argc, char** argv) {
 	Character Tom("Tom", 44, "Beer beast", "Create new beery world order", "bloke");
 	Character a1("Mick", 55, "Nice enough, but... ", "Stealing and love", "Chromeman");
 	Character a2("Nan", 700, "An old nan", "Getting blood out of the carpet", "Serpent");
-	
+	//DB STUFF
+	/*std::string testInst = insertCharacter(c3, 5);
+	exit = sqlite3_exec(db, testInst.c_str(), callback, 0, &errMsg);
+	if (exit != SQLITE_OK) {
+		std::cerr << "Error Insert" << std::endl;
+		sqlite3_free(errMsg);
+	}
+	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
+	*/sqlite3_close(db);
+	//END DB STUFF
+
 	//Set Some Names and ages
 	c1.setCharacterName("Mark");
 	c1.setCharacterAge(6);

@@ -36,4 +36,8 @@ std::vector<Chapter> NarativeGeneralInfo::getChapters()
 {
 	return chapter;
 }
+void NarativeGeneralInfo::setNotes(std::string notes)
+{
+	this->notes = notes;
+}
 ;

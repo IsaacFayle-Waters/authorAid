@@ -28,6 +28,10 @@ std::vector<Scene> Chapter::getSceneList()
 {
 	return scenes;
 }
+void Chapter::setNotes(std::string notes)
+{
+	this->notes = notes;
+}
 ;
 
 

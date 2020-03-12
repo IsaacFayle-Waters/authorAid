@@ -16,6 +16,7 @@ private:
     std::string genralDescription = "Unkown Narative Description";
     std::vector <Chapter> chapter;
     int numberOfChapters = 0;
+    std::string notes = "No notes";
     //array of Other characters linked to 'this' character. Possibly
 public:
     NarativeGeneralInfo();
@@ -39,6 +40,8 @@ public:
 
     int getNumberOfChapters() { return numberOfChapters; };
 
+    void setNotes(std::string notes);
+    std::string getNotes() { return notes; };
 };
 
 #endif
