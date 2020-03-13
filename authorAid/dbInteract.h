@@ -5,8 +5,10 @@
 std::string tableBaseCreate();
 //Display all in Table.
 std::string queryAllFieldsTable(std::string tableName);
+//Delete table
 std::string dropT(std::string table);
-
+//Remove table
+std::string removeIDFromTable(int id);
 //Character loader
 //possibly tempory function because I'm bored. Find better way later.
 //More of a test

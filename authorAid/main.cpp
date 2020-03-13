@@ -22,6 +22,8 @@ void printChapterInfo(Chapter chapter);
 void printNarativeGeneralInfo(NarativeGeneralInfo ngi);
 int callback(void* data, int argc, char** argv, char** azColName);
 
+
+
 //
 //TODO SORT OUT Db. Connected, now need to write to and then read from it.
 //Use example data to effect writing via sqlite. 
@@ -29,9 +31,8 @@ int callback(void* data, int argc, char** argv, char** azColName);
 //TODO GUI
 
 int main(int argc, char** argv) {
-	std::string drop = dropT("CHARACTER");
-	std::cout << drop << std::endl;
-	//Create db instance
+	
+    //Create db instance
 	sqlite3 *db;
 	// Save error messages
 	char* errMsg = 0;
@@ -49,18 +50,19 @@ int main(int argc, char** argv) {
 	else {
 		std::cout << "Opened Database Successfully!" << std::endl;
 	}
-	//query string and db interaction. 
+	
 	std::string query = queryAllFieldsTable("CHARACTER");
-	//exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
-	std::string sql = (tableBaseCreate());
-   //WRITE to db	
-	exit = sqlite3_exec(db, sql.c_str(), callback,0, &errMsg);
-	/*exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
+	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
+	
+   //WRITE to db
+	
+	//exit = sqlite3_exec(db, sql.c_str(), callback,0, &errMsg);
+	
 	if (exit != SQLITE_OK) {
 		std::cerr << "Error Insert" << std::endl;
 		sqlite3_free(errMsg);
 	}
-	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL); */
+	//exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL); 
 	//sqlite3_close(db);
 	
 	//Create Characters
@@ -79,8 +81,8 @@ int main(int argc, char** argv) {
 		sqlite3_free(errMsg);
 	}
 	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
-	*/sqlite3_close(db);
-	//END DB STUFF
+	*/
+	
 
 	//Set Some Names and ages
 	c1.setCharacterName("Mark");
@@ -97,6 +99,22 @@ int main(int argc, char** argv) {
 		"'Why are you like this?' is the sort of thing his wife asks.\n"
 		"'My Dyspraxia drives me to it, NOW LEAVE ME!' would be a typical reply.");
 	
+	/*std::string sql(insertCharacter(c1,1));
+	exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
+				 sql =(insertCharacter(c2, 2));
+	exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
+	 sql = (insertCharacter(c3, 3));
+	exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
+	 sql = (insertCharacter(Tom, 4));
+	exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
+	 sql = (insertCharacter(a1, 5));
+	exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
+	 sql = (insertCharacter(a2, 6));
+	exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
+	*/
+	sqlite3_close(db);
+	//END DB STUFF
+
 	//Creating scenes (Uh oh!)
 	Scene sceneOne;
 	Scene sceneTwo("Nan's car", "A bit later", "Escape.", "Dr.Bamboo legs it", 2);
@@ -162,8 +180,6 @@ int main(int argc, char** argv) {
 	//Example of value passing through classes
 	printNarativeGeneralInfo(ngi2);
 	
-
-	
 return 0;
 }
 
@@ -179,6 +195,9 @@ int callback(void* data, int argc, char** argv, char** azColName) {
 	printf("\n");
 	
 	return 0; }
+
+
+
 
 void printSceneInfo(Scene scene, bool charInfoOn)
 {

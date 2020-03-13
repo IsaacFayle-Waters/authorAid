@@ -6,7 +6,7 @@
 std::string tableBaseCreate()
 {
 	std::string tableString = 
-		"CREATE TABLE CHARACTER("
+		"CREATE TABLE IF NOT EXISTS CHARACTER("
 		"ID INT PRIMARY KEY     NOT NULL, "
 		"NAME           TEXT        NULL, "
 		"AGE            INT			NULL, "
@@ -15,7 +15,7 @@ std::string tableBaseCreate()
 		"GENDER         TEXT		NULL, "
 		"NOTES          TEXT		NULL );"
 		
-		"CREATE TABLE SCENE("
+		"CREATE TABLE IF NOT EXISTS SCENE("
 		"ID INT PRIMARY KEY     NOT NULL,  "
 		"LOCATION       TEXT		NULL,  "
 		"TIME_DATE      TEXT        NULL,  "
@@ -26,7 +26,7 @@ std::string tableBaseCreate()
 		"CHARACTERS     BLOB		NULL,  "
 		"NUM_CRCTRS		INT			NULL );"
 		
-		"CREATE TABLE CHAPTER("
+		"CREATE TABLE IF NOT EXISTS CHAPTER("
 		"ID INT PRIMARY KEY      NOT NULL, "
 		"CHPTR_NUM		INT			 NULL, "
 		"CHPTR_NAME		TEXT		 NULL, "
@@ -34,7 +34,7 @@ std::string tableBaseCreate()
 		"NUM_SCENES		INT		 NOT NULL, "
 		"NOTES          TEXT         NULL);"
 		
-		"CREATE TABLE NGI("
+		"CREATE TABLE IF NOT EXISTS NGI("
 		"ID INT PRIMARY KEY		 NOT NULL, "
 		"TITLE			TEXT		 NULL, "
 		"SETTING		TEXT		 NULL, "
@@ -58,6 +58,13 @@ std::string dropT(std::string table)
 	std::string sql = "DROP TABLE ["+ table +"];";
 	return sql;
 }
+std::string removeIDFromTable(int id)
+{
+	std::string sID = std::to_string(id);
+	std::string sql = "DELETE FROM PERSON WHERE ID = "+sID+";";
+
+	return sql;
+}
 //Might find that this is redundant, but helpful for now in populating db.
 std::string insertCharacter(Character character,int index)
 {
@@ -71,6 +78,6 @@ std::string insertCharacter(Character character,int index)
 	std::string notes = character.getNotes();
 	std::string sql("INSERT INTO CHARACTER VALUES("+ newdex +",'"+ name +"',"+ age +",'"+description+"',"
 					"'"+ motive +"','"+gender+"', '"+notes+"');");
-
 	return sql;
 }
+
