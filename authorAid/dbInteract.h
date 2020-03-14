@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 #include "Character.h"
 //Create base tables. At the moment, only creates character table. 
 std::string tableBaseCreate();

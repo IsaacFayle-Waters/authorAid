@@ -2,6 +2,7 @@
 #ifndef  CHARACTER_H
 #define CHARACTER_H
 #include <string>
+#include <vector>
 
 class Character
 {
@@ -34,6 +35,8 @@ public:
 	
 	void setNotes(std::string notes);
 	std::string getNotes() { return notes; };
+
+	void setCharacterFromDb(std::vector <std::string> dbreturn);
 };
 
 #endif

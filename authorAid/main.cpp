@@ -21,7 +21,8 @@ void printChapterInfo(Chapter chapter);
 void printNarativeGeneralInfo(NarativeGeneralInfo ngi);
 int callback(void* data, int argc, char** argv, char** azColName);
 
-std::string returnThis;
+std::vector <std::string> returnThis;
+std::vector <std::string> identifyThis;
 
 //TODO SORT OUT Db. Connected, now need to write to and then read from it.
 //Use example data to effect writing via sqlite. 
@@ -34,8 +35,6 @@ int main(int argc, char** argv) {
 	sqlite3 *db;
 	// Save error messages
 	char* errMsg = 0;
-	//SQL string for query and entry.
-	//std::string sql;
 	//exit deals with sqlite read and write	
 	int exit = 0;
 	std::string data("CALLBACK FUNCTION");
@@ -49,43 +48,28 @@ int main(int argc, char** argv) {
 	else {
 		std::cout << "Opened Database Successfully!" << std::endl;
 	}
-	
-	//std::string query = queryAllFieldsTable("CHARACTER");
-	//exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
-	
-   //WRITE to db
-	
-	std::string sql(selectFrom("NAME", "CHARACTER",1,1));
+    //db in/out
+	std::string sql(selectFrom("NAME, AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER",1,2));
 	exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
-	
-	std::cout << "Output from db= " << returnThis << std::endl;
-
+	//display
+	for (size_t retList = 0; retList < returnThis.size(); retList++) {
+		std::cout << "Output from db= " << returnThis.at(retList) <<
+			" Identity= " << identifyThis.at(retList) << std::endl;
+	}
 	if (exit != SQLITE_OK) {
 		std::cerr << "Error Insert" << std::endl;
 		sqlite3_free(errMsg);
 	}
-	//exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL); 
-	//sqlite3_close(db);
-	
+		
 	//Create Characters
 	Character c1;
 	Character c2;
-	Character c3("Dr.Bamboo", 77, "A nice old doctor, retired now. Enjoys tending to his garden.",
-		"Execution of ingrates", "Man");
+	Character c3; // ("Dr.Bamboo", 77, "A nice old doctor, retired now. Enjoys tending to his garden.",
+		//"Execution of ingrates", "Man");
 	Character Tom("Tom", 44, "Beer beast", "Create new beery world order", "bloke");
 	Character a1("Mick", 55, "Nice enough, but... ", "Stealing and love", "Chromeman");
 	Character a2("Nan", 700, "An old nan", "Getting blood out of the carpet", "Serpent");
-	//DB STUFF
-	/*std::string testInst = insertCharacter(c3, 5);
-	exit = sqlite3_exec(db, testInst.c_str(), callback, 0, &errMsg);
-	if (exit != SQLITE_OK) {
-		std::cerr << "Error Insert" << std::endl;
-		sqlite3_free(errMsg);
-	}
-	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
-	*/
-	
-
+	c3.setCharacterFromDb(returnThis);
 	//Set Some Names and ages
 	c1.setCharacterName("Mark");
 	c1.setCharacterAge(6);
@@ -178,7 +162,7 @@ int main(int argc, char** argv) {
 	printSceneInfo(sceneFour, false);
 	printSceneInfo(sceneFive, true);
 	
-	printCharacterInfo(a1);
+	printCharacterInfo(c3);
 	//Example of value passing through classes
 	printNarativeGeneralInfo(ngi2);
 	
@@ -194,7 +178,8 @@ int callback(void* data, int argc, char** argv, char** azColName) {
 	for (i = 0; i < argc; i++) {
 		printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
 		//Return to global
-		returnThis = argv[i];
+		returnThis.push_back(argv[i]);
+		identifyThis.push_back(azColName[i]);
 	}
 
 	printf("\n");

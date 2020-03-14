@@ -50,6 +50,8 @@ std::string tableBaseCreate()
 
 std::string queryAllFieldsTable(std::string tableName)
 {
+	//Use with the bellow in main
+	//exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL)
 	std::string qry = "SELECT * FROM " + tableName + ";";
 	return qry;
 }
@@ -58,6 +60,7 @@ std::string dropT(std::string table)
 	std::string sql = "DROP TABLE ["+ table +"];";
 	return sql;
 }
+//remove in relation to id
 std::string removeIDFromTable(int id)
 {
 	std::string sID = std::to_string(id);
@@ -65,8 +68,9 @@ std::string removeIDFromTable(int id)
 
 	return sql;
 }
+//Select field(s) from specific table
 std::string selectFrom(std::string selection, std::string fromTable,int limit, int offset)
-{	
+{	//consider using 'WHERE ID =ID' instead?
 	std::string lim = std::to_string(limit);
 	std::string offs = std::to_string(offset);
 
@@ -89,4 +93,3 @@ std::string insertCharacter(Character character,int index)
 					"'"+ motive +"','"+gender+"', '"+notes+"');");
 	return sql;
 }
-
