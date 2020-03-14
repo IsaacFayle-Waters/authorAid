@@ -15,16 +15,14 @@
 #include "Chapter.h"
 #include "dbInteract.h"
 
-
 void printSceneInfo(Scene scene, bool charInfoOn);
 void printCharacterInfo(Character character);
 void printChapterInfo(Chapter chapter);
 void printNarativeGeneralInfo(NarativeGeneralInfo ngi);
 int callback(void* data, int argc, char** argv, char** azColName);
 
+std::string returnThis;
 
-
-//
 //TODO SORT OUT Db. Connected, now need to write to and then read from it.
 //Use example data to effect writing via sqlite. 
 //TODO finish creating tables
@@ -40,6 +38,7 @@ int main(int argc, char** argv) {
 	//std::string sql;
 	//exit deals with sqlite read and write	
 	int exit = 0;
+	std::string data("CALLBACK FUNCTION");
 	//Open db
 	exit = sqlite3_open("example.db", &db);
 	//Test Connection
@@ -51,13 +50,16 @@ int main(int argc, char** argv) {
 		std::cout << "Opened Database Successfully!" << std::endl;
 	}
 	
-	std::string query = queryAllFieldsTable("CHARACTER");
-	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
+	//std::string query = queryAllFieldsTable("CHARACTER");
+	//exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
 	
    //WRITE to db
 	
-	//exit = sqlite3_exec(db, sql.c_str(), callback,0, &errMsg);
+	std::string sql(selectFrom("NAME", "CHARACTER",1,1));
+	exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
 	
+	std::cout << "Output from db= " << returnThis << std::endl;
+
 	if (exit != SQLITE_OK) {
 		std::cerr << "Error Insert" << std::endl;
 		sqlite3_free(errMsg);
@@ -182,22 +184,22 @@ int main(int argc, char** argv) {
 	
 return 0;
 }
-
+//Return from database
 int callback(void* data, int argc, char** argv, char** azColName) { 
 	
 	int i;
+	std::string toReturn;
 	fprintf(stderr, "%s: ", (const char*)data);
 
 	for (i = 0; i < argc; i++) {
 		printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+		//Return to global
+		returnThis = argv[i];
 	}
 
 	printf("\n");
 	
 	return 0; }
-
-
-
 
 void printSceneInfo(Scene scene, bool charInfoOn)
 {

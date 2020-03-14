@@ -65,6 +65,15 @@ std::string removeIDFromTable(int id)
 
 	return sql;
 }
+std::string selectFrom(std::string selection, std::string fromTable,int limit, int offset)
+{	
+	std::string lim = std::to_string(limit);
+	std::string offs = std::to_string(offset);
+
+	std::string sql = "SELECT " + selection + " FROM " + fromTable +" LIMIT "+ lim +" OFFSET "+ offs +";";
+
+	return sql;
+}
 //Might find that this is redundant, but helpful for now in populating db.
 std::string insertCharacter(Character character,int index)
 {
