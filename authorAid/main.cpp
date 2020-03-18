@@ -20,9 +20,14 @@ void printCharacterInfo(Character character);
 void printChapterInfo(Chapter chapter);
 void printNarativeGeneralInfo(NarativeGeneralInfo ngi);
 int callback(void* data, int argc, char** argv, char** azColName);
+void displayAndError(int exit);
+int dbTest(struct sqlite3 &db, int exit);
+
 
 std::vector <std::string> returnThis;
 std::vector <std::string> identifyThis;
+//save error messages
+char* errMsg = 0;
 
 //TODO SORT OUT Db. Connected, now need to write to and then read from it.
 //Use example data to effect writing via sqlite. 
@@ -33,43 +38,32 @@ int main(int argc, char** argv) {
 	
     //Create db instance
 	sqlite3 *db;
-	// Save error messages
-	char* errMsg = 0;
+
 	//exit deals with sqlite read and write	
 	int exit = 0;
 	std::string data("CALLBACK FUNCTION");
 	//Open db
 	exit = sqlite3_open("example.db", &db);
 	//Test Connection
-	if (exit) {
-		std::cerr << "Error open db" << sqlite3_errmsg(db) << std::endl;
-		return(-1);
-	}
-	else {
-		std::cout << "Opened Database Successfully!" << std::endl;
-	}
-    //db in/out
-	std::string sql(selectFrom("NAME, AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER",1,2));
-	exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
-	//display
-	for (size_t retList = 0; retList < returnThis.size(); retList++) {
-		std::cout << "Output from db= " << returnThis.at(retList) <<
-			" Identity= " << identifyThis.at(retList) << std::endl;
-	}
-	if (exit != SQLITE_OK) {
-		std::cerr << "Error Insert" << std::endl;
-		sqlite3_free(errMsg);
-	}
-		
+	dbTest(*db,exit);
+	
+	//TEMP UI
+	bool ui = true;
+
+
 	//Create Characters
 	Character c1;
 	Character c2;
 	Character c3; // ("Dr.Bamboo", 77, "A nice old doctor, retired now. Enjoys tending to his garden.",
 		//"Execution of ingrates", "Man");
+	std::string sql(selectFrom("NAME, AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER", 1, 2));
+	exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+	c3.setCharacterFromDb(returnThis);
+	displayAndError(exit);
 	Character Tom("Tom", 44, "Beer beast", "Create new beery world order", "bloke");
 	Character a1("Mick", 55, "Nice enough, but... ", "Stealing and love", "Chromeman");
 	Character a2("Nan", 700, "An old nan", "Getting blood out of the carpet", "Serpent");
-	c3.setCharacterFromDb(returnThis);
+	
 	//Set Some Names and ages
 	c1.setCharacterName("Mark");
 	c1.setCharacterAge(6);
@@ -98,6 +92,7 @@ int main(int argc, char** argv) {
 	 sql = (insertCharacter(a2, 6));
 	exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
 	*/
+	
 	sqlite3_close(db);
 	//END DB STUFF
 
@@ -174,7 +169,7 @@ int callback(void* data, int argc, char** argv, char** azColName) {
 	int i;
 	std::string toReturn;
 	fprintf(stderr, "%s: ", (const char*)data);
-
+	//Recieve data
 	for (i = 0; i < argc; i++) {
 		printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
 		//Return to global
@@ -185,6 +180,32 @@ int callback(void* data, int argc, char** argv, char** azColName) {
 	printf("\n");
 	
 	return 0; }
+
+void displayAndError(int exit)
+{
+	for (size_t retList = 0; retList < returnThis.size(); retList++) {
+		std::cout << "Output from db= " << returnThis.at(retList) <<
+			" Identity= " << identifyThis.at(retList) << std::endl;
+	}
+	if (exit != SQLITE_OK) {
+		std::cerr << "Error Insert" << std::endl;
+		sqlite3_free(errMsg);
+	}
+
+}
+//Possibly not right? Need to research pointers more.
+int dbTest(struct sqlite3 &db, int exit)
+{
+	if (exit) {
+		std::cerr << "Error open db" << sqlite3_errmsg(&db) << std::endl;
+		return(-1);
+	}
+	else {
+		std::cout << "Opened Database Successfully!" << std::endl;
+	}
+}
+
+
 
 void printSceneInfo(Scene scene, bool charInfoOn)
 {
