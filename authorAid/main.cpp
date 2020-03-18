@@ -48,7 +48,30 @@ int main(int argc, char** argv) {
 	dbTest(*db,exit);
 	
 	//TEMP UI
-	bool ui = true;
+	int ui = 1;
+	while (ui) {
+		std::string input;
+		std::cout << "Enter a command "; 
+		std::getline(std::cin, input);
+		std::cout << input << std::endl;
+
+
+		
+		if (input == "exit") {
+			ui = 0;
+		}
+		else if (input == "character") {
+			Character temp;
+			int idIs;
+			std::cout << "Character id is? ";
+			std::cin >> idIs;
+			std::string sql(selectFrom("NAME, AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER", 1, idIs));
+			exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+			temp.setCharacterFromDb(returnThis);
+			displayAndError(exit);
+		}
+
+	}
 
 
 	//Create Characters
