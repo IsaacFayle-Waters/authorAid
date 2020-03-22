@@ -23,11 +23,13 @@ int callback(void* data, int argc, char** argv, char** azColName);
 void displayAndError(int exit);
 int dbTest(struct sqlite3 &db, int exit);
 
-
+//Return strings from db (identifyThis possibly redundant)
 std::vector <std::string> returnThis;
 std::vector <std::string> identifyThis;
 //save error messages
 char* errMsg = 0;
+//Visual testing from manually set values on/off
+int visTest = 0;
 
 //TODO SORT OUT Db. Connected, now need to write to and then read from it.
 //Use example data to effect writing via sqlite. 
@@ -36,9 +38,11 @@ char* errMsg = 0;
 
 int main(int argc, char** argv) {
 	
+	//UPDATE COMPANY SET ADDRESS = 'Texas' WHERE ID = 6
+	std::string test = updateDb("CHARACTER","MOTIVE","Get out of bed", 3);
+	std::cout << test << std::endl;
     //Create db instance
 	sqlite3 *db;
-
 	//exit deals with sqlite read and write	
 	int exit = 0;
 	std::string data("CALLBACK FUNCTION");
@@ -55,135 +59,136 @@ int main(int argc, char** argv) {
 		std::getline(std::cin, input);
 		std::cout << input << std::endl;
 
-
-		
 		if (input == "exit") {
 			ui = 0;
 		}
 		else if (input == "character") {
-			Character temp;
+			Character *temp = new Character();
 			int idIs;
 			std::cout << "Character id is? ";
 			std::cin >> idIs;
 			std::string sql(selectFrom("NAME, AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER", 1, idIs));
 			exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
-			temp.setCharacterFromDb(returnThis);
+			temp->setCharacterFromDb(returnThis);//.setCharacterFromDb(returnThis);
 			displayAndError(exit);
-		}
-
+			
+			std::cout << temp->getName() << std::endl;
+		}	
 	}
 
+	if (visTest) {
+		//Create Characters
+		Character c1;
+		Character c2;
+		Character c3; // ("Dr.Bamboo", 77, "A nice old doctor, retired now. Enjoys tending to his garden.",
+			//"Execution of ingrates", "Man");
+		std::string sql(selectFrom("NAME, AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER", 1, 2));
+		exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+		c3.setCharacterFromDb(returnThis);
+		displayAndError(exit);
+		Character Tom("Tom", 44, "Beer beast", "Create new beery world order", "bloke");
+		Character a1("Mick", 55, "Nice enough, but... ", "Stealing and love", "Chromeman");
+		Character a2("Nan", 700, "An old nan", "Getting blood out of the carpet", "Serpent");
 
-	//Create Characters
-	Character c1;
-	Character c2;
-	Character c3; // ("Dr.Bamboo", 77, "A nice old doctor, retired now. Enjoys tending to his garden.",
-		//"Execution of ingrates", "Man");
-	std::string sql(selectFrom("NAME, AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER", 1, 2));
-	exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
-	c3.setCharacterFromDb(returnThis);
-	displayAndError(exit);
-	Character Tom("Tom", 44, "Beer beast", "Create new beery world order", "bloke");
-	Character a1("Mick", 55, "Nice enough, but... ", "Stealing and love", "Chromeman");
-	Character a2("Nan", 700, "An old nan", "Getting blood out of the carpet", "Serpent");
-	
-	//Set Some Names and ages
-	c1.setCharacterName("Mark");
-	c1.setCharacterAge(6);
-	c1.setGender("Boy");
-	c1.setMotive("Chrisps");
-	c2.setCharacterName("Babdoo");
-	c2.setCharacterAge(13);
-	c2.setGender("Female");
-	c2.setDescription("Teenage girl");
+		//Set Some Names and ages
+		c1.setCharacterName("Mark");
+		c1.setCharacterAge(6);
+		c1.setGender("Boy");
+		c1.setMotive("Chrisps");
+		c2.setCharacterName("Babdoo");
+		c2.setCharacterAge(13);
+		c2.setGender("Female");
+		c2.setDescription("Teenage girl");
 
-	//Evidence 'notes' working.
-	a1.setNotes("Always, he gets into the fighting on tarmac over beer.\n"
-		"'Why are you like this?' is the sort of thing his wife asks.\n"
-		"'My Dyspraxia drives me to it, NOW LEAVE ME!' would be a typical reply.");
-	
-	/*std::string sql(insertCharacter(c1,1));
-	exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
-				 sql =(insertCharacter(c2, 2));
-	exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
-	 sql = (insertCharacter(c3, 3));
-	exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
-	 sql = (insertCharacter(Tom, 4));
-	exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
-	 sql = (insertCharacter(a1, 5));
-	exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
-	 sql = (insertCharacter(a2, 6));
-	exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
-	*/
-	
+		//Evidence 'notes' working.
+		a1.setNotes("Always, he gets into the fighting on tarmac over beer.\n"
+			"'Why are you like this?' is the sort of thing his wife asks.\n"
+			"'My Dyspraxia drives me to it, NOW LEAVE ME!' would be a typical reply.");
+
+		/*std::string sql(insertCharacter(c1,1));
+		exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
+					 sql =(insertCharacter(c2, 2));
+		exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
+		 sql = (insertCharacter(c3, 3));
+		exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
+		 sql = (insertCharacter(Tom, 4));
+		exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
+		 sql = (insertCharacter(a1, 5));
+		exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
+		 sql = (insertCharacter(a2, 6));
+		exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
+		*/
+
+		sqlite3_close(db);
+		//END DB STUFF
+
+		//Creating scenes (Uh oh!)
+		Scene sceneOne;
+		Scene sceneTwo("Nan's car", "A bit later", "Escape.", "Dr.Bamboo legs it", 2);
+		Scene sceneThree("Nan's Garden", "Thursday", "Conclusions in RED!", "Only one person died", 3);
+		Scene sceneFour("Hell", "No!", "Dr Dr Dr", "dsgGGGGGfyes", 4);
+		Scene sceneFive("Nan's House", "Friday", "End now", "Nan is watching TV, in her chair", 5);
+		sceneFive.setCharacters(a2);
+		sceneFive.setCharacters(c1);
+		sceneFive.setNotes("Nan is pleased with her week. Everything went as she had hoped, and now the one show is on.");
+		sceneThree.setNotes("This is not the end.");
+		sceneOne.setLocation("Nan's House");
+		sceneOne.setSceneName("Dr. Bamboo kills two people.");
+		sceneOne.setTimeAndOrDate("A Wednesday");
+		sceneOne.setSceneNumber(1);
+
+		//Link characters to the scenes
+		sceneOne.setCharacters(c1);
+		sceneOne.setCharacters(c2);
+		sceneOne.setCharacters(c3);
+		sceneOne.setCharacters(Tom);
+		sceneOne.setCharacters(a1);
+		sceneTwo.setCharacters(c3);
+		sceneThree.setCharacters(a2);
+		sceneThree.setCharacters(c1);
+		sceneThree.setCharacters(c2);
+		sceneThree.setCharacters(Tom);
+
+		//Chapters 
+		Chapter chap1(1, "Etchings of FEAR!");
+		Chapter chap2(2, "Epilogue... OF FEAR!");
+		chap1.setScenes(sceneOne);
+		chap1.setScenes(sceneTwo);
+		chap1.setScenes(sceneThree);
+		chap2.setScenes(sceneFour);
+		chap2.setScenes(sceneFive);
+
+		//Set Narrative General Info
+		NarativeGeneralInfo ngi1;
+		NarativeGeneralInfo ngi2;
+		ngi1.setTitle("Bad day at Nan's");
+		ngi1.setSetting("Nan's house, car, and garden");
+		ngi1.setGenre("Romance");
+		ngi1.setGeneralDescription("Book about a murder spree by a bad Dr.");
+
+		//Include chapters
+		ngi1.setChapter(chap1);
+		ngi1.setChapter(chap2);
+
+		//Display Narrative info, Chapters, Scenes, and a character.
+		printNarativeGeneralInfo(ngi1);
+
+		printChapterInfo(chap1);
+
+		printSceneInfo(sceneOne, false);
+		printSceneInfo(sceneTwo, true);
+		printSceneInfo(sceneThree, false);
+
+		printChapterInfo(chap2);
+		printSceneInfo(sceneFour, false);
+		printSceneInfo(sceneFive, true);
+
+		printCharacterInfo(c3);
+		//Example of value passing through classes
+		printNarativeGeneralInfo(ngi2);
+
+	}
 	sqlite3_close(db);
-	//END DB STUFF
-
-	//Creating scenes (Uh oh!)
-	Scene sceneOne;
-	Scene sceneTwo("Nan's car", "A bit later", "Escape.", "Dr.Bamboo legs it", 2);
-	Scene sceneThree("Nan's Garden", "Thursday", "Conclusions in RED!", "Only one person died", 3);
-	Scene sceneFour("Hell", "No!", "Dr Dr Dr", "dsgGGGGGfyes", 4);
-	Scene sceneFive("Nan's House", "Friday", "End now", "Nan is watching TV, in her chair", 5);
-	sceneFive.setCharacters(a2);
-	sceneFive.setCharacters(c1);
-	sceneFive.setNotes("Nan is pleased with her week. Everything went as she had hoped, and now the one show is on.");
-	sceneThree.setNotes("This is not the end.");
-	sceneOne.setLocation("Nan's House");
-	sceneOne.setSceneName("Dr. Bamboo kills two people.");
-	sceneOne.setTimeAndOrDate("A Wednesday");
-	sceneOne.setSceneNumber(1);
-
-	//Link characters to the scenes
-	sceneOne.setCharacters(c1);
-	sceneOne.setCharacters(c2);
-	sceneOne.setCharacters(c3);
-	sceneOne.setCharacters(Tom);
-	sceneOne.setCharacters(a1);
-	sceneTwo.setCharacters(c3);
-	sceneThree.setCharacters(a2);
-	sceneThree.setCharacters(c1);
-	sceneThree.setCharacters(c2);
-	sceneThree.setCharacters(Tom);
-
-	//Chapters 
-	Chapter chap1(1,"Etchings of FEAR!");
-	Chapter chap2(2, "Epilogue... OF FEAR!");
-	chap1.setScenes(sceneOne);
-	chap1.setScenes(sceneTwo);
-	chap1.setScenes(sceneThree);
-	chap2.setScenes(sceneFour);
-	chap2.setScenes(sceneFive);
-
-	//Set Narrative General Info
-	NarativeGeneralInfo ngi1;
-	NarativeGeneralInfo ngi2;
-	ngi1.setTitle("Bad day at Nan's");
-	ngi1.setSetting("Nan's house, car, and garden");
-	ngi1.setGenre("Romance");
-	ngi1.setGeneralDescription("Book about a murder spree by a bad Dr.");
-
-	//Include chapters
-	ngi1.setChapter(chap1);
-	ngi1.setChapter(chap2);
-
-	//Display Narrative info, Chapters, Scenes, and a character.
-	printNarativeGeneralInfo(ngi1);
-
-	printChapterInfo(chap1);
-
-	printSceneInfo(sceneOne,false);
-	printSceneInfo(sceneTwo,true);
-	printSceneInfo(sceneThree,false);
-
-	printChapterInfo(chap2);
-	printSceneInfo(sceneFour, false);
-	printSceneInfo(sceneFive, true);
-	
-	printCharacterInfo(c3);
-	//Example of value passing through classes
-	printNarativeGeneralInfo(ngi2);
-	
 return 0;
 }
 //Return from database

@@ -78,6 +78,14 @@ std::string selectFrom(std::string selection, std::string fromTable,int limit, i
 
 	return sql;
 }
+std::string updateDb(std::string table, std::string column, std::string value, int id)
+{	 
+	std::string sID = std::to_string(id);
+	
+	std::string sql("UPDATE "+table+" SET "+column+" = '"+value+"' WHERE ID = "+sID+";");
+	
+	return sql;
+}
 //Might find that this is redundant, but helpful for now in populating db.
 std::string insertCharacter(Character character,int index)
 {
