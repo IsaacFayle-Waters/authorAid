@@ -39,8 +39,10 @@ int visTest = 0;
 int main(int argc, char** argv) {
 	
 	//UPDATE COMPANY SET ADDRESS = 'Texas' WHERE ID = 6
-	std::string test = updateDb("CHARACTER","MOTIVE","Get out of bed", 3);
-	std::cout << test << std::endl;
+	//std::string test = updateDb("CHARACTER","MOTIVE","Get out of bed", 1);
+	//std::cout << test << std::endl;
+
+
     //Create db instance
 	sqlite3 *db;
 	//exit deals with sqlite read and write	
@@ -50,6 +52,8 @@ int main(int argc, char** argv) {
 	exit = sqlite3_open("example.db", &db);
 	//Test Connection
 	dbTest(*db,exit);
+
+	//exit = sqlite3_exec(db, test.c_str(), callback, (void*)data.c_str(), NULL);
 	
 	//TEMP UI
 	int ui = 1;
@@ -73,6 +77,7 @@ int main(int argc, char** argv) {
 			displayAndError(exit);
 			
 			std::cout << temp->getName() << std::endl;
+			returnThis.clear();
 		}	
 	}
 
