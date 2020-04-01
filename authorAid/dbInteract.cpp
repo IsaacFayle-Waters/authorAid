@@ -86,6 +86,12 @@ std::string updateDb(std::string table, std::string column, std::string value, i
 	
 	return sql;
 }
+std::string insertSpecific(std::string table, std::string column, std::string value, int id)
+{	
+	std::string sID = std::to_string(id);
+	std::string sql("INSERT INTO " + table + " (ID,"+column+") VALUES (" + sID + ", '" + value + "');");
+	return sql;
+}
 //Might find that this is redundant, but helpful for now in populating db.
 std::string insertCharacter(Character character,int index)
 {

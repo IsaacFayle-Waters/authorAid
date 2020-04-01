@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <sqlite3.h>
 
@@ -22,6 +23,7 @@ void printNarativeGeneralInfo(NarativeGeneralInfo ngi);
 int callback(void* data, int argc, char** argv, char** azColName);
 void displayAndError(int exit);
 int dbTest(struct sqlite3 &db, int exit);
+int inputInt();
 
 //Return strings from db (identifyThis possibly redundant)
 std::vector <std::string> returnThis;
@@ -29,7 +31,9 @@ std::vector <std::string> identifyThis;
 //save error messages
 char* errMsg = 0;
 //Visual testing from manually set values on/off
-int visTest = 0;
+int visTest = 1;
+int updateTest = 1;
+int testUI = 0;
 
 //TODO SORT OUT Db. Connected, now need to write to and then read from it.
 //Use example data to effect writing via sqlite. 
@@ -39,9 +43,8 @@ int visTest = 0;
 int main(int argc, char** argv) {
 	
 	//UPDATE COMPANY SET ADDRESS = 'Texas' WHERE ID = 6
-	//std::string test = updateDb("CHARACTER","MOTIVE","Get out of bed", 1);
-	//std::cout << test << std::endl;
-
+	std::string test = insertSpecific("CHARACTER", "NAME", "Caindy BanBo", 0);
+		std::cout << test << std::endl;
 
     //Create db instance
 	sqlite3 *db;
@@ -49,58 +52,106 @@ int main(int argc, char** argv) {
 	int exit = 0;
 	std::string data("CALLBACK FUNCTION");
 	//Open db
-	exit = sqlite3_open("example.db", &db);
+	if (updateTest){ 
+		exit = sqlite3_open("exampleUpdateTest.db", &db); 
+		if (exit) {
+			std::cerr << "Error open db" << sqlite3_errmsg(db) << std::endl;
+			return(-1);
+		}
+		else {
+			std::cout << "Opened Database Successfully!" << std::endl;
+		}
+	}
+	else {
+		exit = sqlite3_open("example.db", &db);
+	}
 	//Test Connection
 	dbTest(*db,exit);
 
+	//std::string test(tableBaseCreate());
+	std::string query(queryAllFieldsTable("CHARACTER"));
+	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
 	//exit = sqlite3_exec(db, test.c_str(), callback, (void*)data.c_str(), NULL);
 	
 	//TEMP UI
-	int ui = 1;
-	while (ui) {
-		std::string input;
-		std::cout << "Enter a command "; 
-		std::getline(std::cin, input);
-		std::cout << input << std::endl;
+	while (testUI) {
+		int ui = 1;
+		while (ui) {
+			std::string input;
+			std::cout << "Enter a command ";
+			std::getline(std::cin, input);
+			std::cout << input << std::endl;
 
-		if (input == "exit") {
-			ui = 0;
+			if (input == "exit") {
+				ui = 0;
+			}
+			else if (input == "character view") {
+				//Character *temp = new Character();
+				int idIs;
+				std::cout << "Character id is? ";
+				idIs = inputInt();
+				std::string sql(selectFrom("NAME", "CHARACTER", 1, idIs));
+				exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+				//temp->setCharacterFromDb(returnThis);//.setCharacterFromDb(returnThis);
+				displayAndError(exit);
+
+				//std::cout << temp->getName() << std::endl;
+				returnThis.clear();
+			}
+			else if (input == "set chtr") {
+				std::string choice;
+				std::cout << "What do you want to set?";
+				std::getline(std::cin, choice);
+				if (choice == "name") {
+					std::string name;
+					//TEMP
+					int id;
+					id = inputInt();
+					//ENDTEMP
+					std::cout << "Choose a name: ";
+					std::getline(std::cin, name);
+					std::string sql(updateDb("CHARACTER", "NAME", name, id));
+					exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+				}
+
+
+			}
 		}
-		else if (input == "character") {
-			Character *temp = new Character();
-			int idIs;
-			std::cout << "Character id is? ";
-			std::cin >> idIs;
-			std::string sql(selectFrom("NAME, AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER", 1, idIs));
-			exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
-			temp->setCharacterFromDb(returnThis);//.setCharacterFromDb(returnThis);
-			displayAndError(exit);
-			
-			std::cout << temp->getName() << std::endl;
-			returnThis.clear();
-		}	
 	}
-
 	if (visTest) {
 		//Create Characters
 		Character c1;
 		Character c2;
-		Character c3; // ("Dr.Bamboo", 77, "A nice old doctor, retired now. Enjoys tending to his garden.",
+		Character c3; //("Dr.Bamboo", 77, "A nice old doctor, retired now. Enjoys tending to his garden.",
 			//"Execution of ingrates", "Man");
 		std::string sql(selectFrom("NAME, AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER", 1, 2));
 		exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
-		c3.setCharacterFromDb(returnThis);
-		displayAndError(exit);
+		//c3.setCharacterFromDb(returnThis);
+		//displayAndError(exit);
 		Character Tom("Tom", 44, "Beer beast", "Create new beery world order", "bloke");
 		Character a1("Mick", 55, "Nice enough, but... ", "Stealing and love", "Chromeman");
 		Character a2("Nan", 700, "An old nan", "Getting blood out of the carpet", "Serpent");
+		
+		//TEST INHERITANCE
+		Character testBoy;
+		Scene testScene;
+		NarativeGeneralInfo testNGI;
+		printNarativeGeneralInfo(testNGI);
+		printSceneInfo(testScene,true);
+		testBoy.setName("TestMan");
+		printCharacterInfo(testBoy);
+		Chapter testChapter;
+		testChapter.setDescription("A non-existent chapter, soley for test purposes ");
+		std::cout << "TESTING TESTING: " << testChapter.getDescription() << std::endl;
+		printChapterInfo(testChapter);
+		//END TEST
 
 		//Set Some Names and ages
-		c1.setCharacterName("Mark");
+		c1.setName("Mark");
 		c1.setCharacterAge(6);
 		c1.setGender("Boy");
 		c1.setMotive("Chrisps");
-		c2.setCharacterName("Babdoo");
+		c2.setName("Babdoo");
 		c2.setCharacterAge(13);
 		c2.setGender("Female");
 		c2.setDescription("Teenage girl");
@@ -138,9 +189,10 @@ int main(int argc, char** argv) {
 		sceneFive.setNotes("Nan is pleased with her week. Everything went as she had hoped, and now the one show is on.");
 		sceneThree.setNotes("This is not the end.");
 		sceneOne.setLocation("Nan's House");
-		sceneOne.setSceneName("Dr. Bamboo kills two people.");
+		sceneOne.setName("Dr. Bamboo kills two people.");
 		sceneOne.setTimeAndOrDate("A Wednesday");
 		sceneOne.setSceneNumber(1);
+
 
 		//Link characters to the scenes
 		sceneOne.setCharacters(c1);
@@ -169,7 +221,7 @@ int main(int argc, char** argv) {
 		ngi1.setTitle("Bad day at Nan's");
 		ngi1.setSetting("Nan's house, car, and garden");
 		ngi1.setGenre("Romance");
-		ngi1.setGeneralDescription("Book about a murder spree by a bad Dr.");
+		ngi1.setDescription("Book about a murder spree by a bad Dr.");
 
 		//Include chapters
 		ngi1.setChapter(chap1);
@@ -238,7 +290,21 @@ int dbTest(struct sqlite3 &db, int exit)
 	}
 }
 
-
+int inputInt()
+{
+	std::string input = "";
+	int id;
+	while (true) {
+		std::cout << "Please enter a valid ID number: ";
+		std::getline(std::cin, input);
+		// This converts from string to int.
+		std::stringstream myStream(input);
+		if (myStream >> id)
+			break;
+		std::cout << "Invalid number, please try again" << std::endl;
+	}
+	return id;
+}
 
 void printSceneInfo(Scene scene, bool charInfoOn)
 {
@@ -247,9 +313,9 @@ void printSceneInfo(Scene scene, bool charInfoOn)
 		"Scene: " << scene.getSceneNumber() << std::endl <<
 		"Location: " << scene.getLocation() << std::endl <<
 		"Number of Characters: " << scene.getNumberOfCharacters() << std::endl <<
-		"Name of scene: " << scene.getSceneName() << std::endl <<
+		"Name of scene: " << scene.getName() << std::endl <<
 		"Time/date/etc: " << scene.getTimeAndOrDate() << std::endl <<
-		"What happened?: " << scene.getGeneralDescription() << std::endl <<
+		"What happened?: " << scene.getDescription() << std::endl <<
 		"Notes: " << scene.getNotes() << std::endl << std::endl;
 	//Characters displayed following being Linked to a scene
 	if (charInfoOn == true) {
@@ -292,7 +358,7 @@ void printChapterInfo(Chapter chapter)
 	if (chapSize != 0) {
 		for (int i = 0; i < chapSize; i++) {
 			std::cout << i + 1 << ": ";
-			std::cout << chapter.getSceneList().at(i).getSceneName() << std::endl;
+			std::cout << chapter.getSceneList().at(i).getName() << std::endl;
 		}
 		std::cout << std::endl;
 		//Access first character name, from first scene in Chapter.
@@ -314,7 +380,7 @@ void printNarativeGeneralInfo(NarativeGeneralInfo ngi)
 	std::cout << "Setting: ";
 	std::cout << ngi.getSetting() << std::endl;
 	std::cout << "Description: ";
-	std::cout << ngi.getGeneralDescription() << std::endl;
+	std::cout << ngi.getDescription() << std::endl;
 	std::cout << "Number of Chapters: ";
 	std::cout << ngi.getNumberOfChapters();
 	std::cout << std::endl << std::endl;
@@ -322,10 +388,10 @@ void printNarativeGeneralInfo(NarativeGeneralInfo ngi)
 	int narSize = ngi.getChapters().size();
 	if (narSize != 0) {
 		for (int k = 0; k < narSize; k++) {
-			if (ngi.getChapters().at(k).getChapterName() != "") {
+			if (ngi.getChapters().at(k).getName() != "") {
 				std::cout << "Chapter ";
 				std::cout << ngi.getChapters().at(k).getChapterNumber() << " :";
-				std::cout << ngi.getChapters().at(k).getChapterName() << std::endl;
+				std::cout << ngi.getChapters().at(k).getName() << std::endl;
 			}
 			else{/*Do Nothing*/ }
 		}

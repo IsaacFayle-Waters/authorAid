@@ -8,8 +8,8 @@ Scene::Scene(std::string location, std::string timeAndOrDate,
 {
 	setLocation(location);
 	setTimeAndOrDate(timeAndOrDate);
-	setSceneName(sceneName);
-	setGenralDescription(genralDescription);
+	setName(sceneName);
+	setDescription(genralDescription);
 	setSceneNumber(sceneNumber);
 	
 };
@@ -24,30 +24,30 @@ void Scene::setTimeAndOrDate(std::string timeAndOrDate)
 	this->timeAndOrDate = timeAndOrDate;
 };
 
-void Scene::setSceneName(std::string sceneName)
+/*void Scene::setSceneName(std::string sceneName)
 {
 	this->sceneName = sceneName;
-};
+};*/
 
-void Scene::setNotes(std::string notes)
+/*void Scene::setNotes(std::string notes)
 {
 	this->notes = notes;
-}
+}*/
 
 void Scene::setSceneNumber(int sceneNumber)
 {
 	this->sceneNumber = sceneNumber;
-}
+};
 void Scene::setCharacters(Character character)
 {
 	this->characters.push_back(character);
 	this->numberOfCharacters += 1;
 };
 std::vector<Character> Scene::getCharacterList()
-{	
+{
 	return characters;
-}
-void Scene::setGenralDescription(std::string genralDescription)
+};
+/*void Scene::setGenralDescription(std::string genralDescription)
 {
 	this->generalDescription = genralDescription;
-};
+};*/

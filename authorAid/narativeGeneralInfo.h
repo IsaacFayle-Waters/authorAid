@@ -6,17 +6,18 @@
 #define NARATIVE_GEN_INFO_H
 #include <string>
 #include <vector>
+#include "World.h"
 #include "Chapter.h"
-class NarativeGeneralInfo
+class NarativeGeneralInfo: public World
 {
 private:
-    std::string title = "Unkown Title";
-    std::string setting = "Unkown Setting";
-    std::string genre = "Unkown Genre";
-    std::string genralDescription = "Unkown Narative Description";
+    std::string title = "Unknown Title";
+    std::string setting = "Unknown Setting";
+    std::string genre = "Unknown Genre";
+    //std::string genralDescription = "Unknown Narative Description";
     std::vector <Chapter> chapter;
     int numberOfChapters = 0;
-    std::string notes = "No notes";
+    //std::string notes = "No notes";
     //array of Other characters linked to 'this' character. Possibly
 public:
     NarativeGeneralInfo();
@@ -32,16 +33,16 @@ public:
     void setGenre(std::string genre);
     std::string getGenre() { return genre; };
 
-    void setGeneralDescription(std::string generalDescription);
-    std::string getGeneralDescription() { return genralDescription; };
+    //void setGeneralDescription(std::string generalDescription);
+    //std::string getGeneralDescription() { return genralDescription; };
 
     void setChapter(Chapter chapter);
     std::vector<Chapter> getChapters();
 
     int getNumberOfChapters() { return numberOfChapters; };
 
-    void setNotes(std::string notes);
-    std::string getNotes() { return notes; };
+    //void setNotes(std::string notes);
+    //std::string getNotes() { return notes; };
 };
 
 #endif

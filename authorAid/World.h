@@ -1,8 +1,28 @@
 #pragma once
+#include <string>
 //In depth look at the world the narrative takes place in.  
 //TODO
 class World
 {
+
+private: 
+	int characterCount = 0;
+	int locationCount = 0;
+	int sceneCount = 0;
+
+	std::string name = "No Name";
+	std::string description = "No Description W";
+	std::string notes = "No Notes W";
+
+public:
+	void setName(std::string name);
+	std::string getName() { return name; };
+
+	void setDescription(std::string description);
+	std::string getDescription() { return description; };
+
+	void setNotes(std::string notes);
+	std::string getNotes() { return notes; };
 
 //General information about Places
 	//List of places (Subplaces?)

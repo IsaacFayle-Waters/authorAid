@@ -6,16 +6,17 @@
 #include <string>
 #include <vector>
 #include "Character.h"
+#include "World.h"
 
-class Scene
+class Scene: public World
 {
-	//friend class Character;
+	
 private:
 	std::string location = "Unkown Location";
 	std::string timeAndOrDate = "Unkown Temporal Space";
-	std::string sceneName = "Unkown Scene Name";
-	std::string generalDescription = "Unkown Scene Description";
-	std::string notes = "No notes";
+	//std::string sceneName = "Unkown Scene Name";
+	//std::string generalDescription = "Unkown Scene Description";
+	//std::string notes = "No notes";
 	int sceneNumber = -1;
 	std::vector <Character> characters;
 	int numberOfCharacters = 0;
@@ -30,11 +31,11 @@ public:
 	void setTimeAndOrDate(std::string timeAndOrDate);
 	std::string getTimeAndOrDate() { return timeAndOrDate; };
 
-	void setSceneName(std::string sceneName);
-	std::string getSceneName() { return sceneName; };
+	//void setSceneName(std::string sceneName);
+	//std::string getSceneName() { return sceneName; };
 
-	void setNotes(std::string notes);
-	std::string getNotes() { return notes; };
+	//void setNotes(std::string notes);
+	//std::string getNotes() { return notes; };
 
 	void setSceneNumber(int sceneNumber);
 	int getSceneNumber() { return sceneNumber; };
@@ -42,8 +43,8 @@ public:
 	void setCharacters(Character character);
 	std::vector<Character> getCharacterList();
 
-	void setGenralDescription(std::string genralDescription);
-	std::string getGeneralDescription() { return generalDescription; };
+	//void setGenralDescription(std::string genralDescription);
+	//std::string getGeneralDescription() { return generalDescription; };
 	
 	int getNumberOfCharacters() { return numberOfCharacters; };
 };

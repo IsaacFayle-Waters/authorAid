@@ -15,6 +15,8 @@ std::string selectFrom(std::string selection, std::string fromTable, int limit, 
 //Update values
 std::string updateDb(std::string table, std::string column, std::string value, int id);
 
+std::string insertSpecific(std::string table, std::string column, std::string value, int id);
+
 //Character loader
 //possibly tempory function because I'm bored. Find better way later.
 //More of a test
