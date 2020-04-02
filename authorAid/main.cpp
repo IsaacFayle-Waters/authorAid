@@ -22,19 +22,23 @@ void printCharacterInfo(Character character);
 void printChapterInfo(Chapter chapter);
 void printNarativeGeneralInfo(NarativeGeneralInfo ngi);
 int callback(void* data, int argc, char** argv, char** azColName);
-void displayAndError(int exit);
+void displayAndError(int exit, bool display);
 int dbTest(struct sqlite3 &db, int exit);
 int inputInt();
+std::string inputChtrChoice(std::string message);
+std::string data("CALLBACK FUNCTION");
 
 //Return strings from db (identifyThis possibly redundant)
 std::vector <std::string> returnThis;
 std::vector <std::string> identifyThis;
+int chaCount = 0;
+int idCount = 0;
 //save error messages
 char* errMsg = 0;
 //Visual testing from manually set values on/off
-int visTest = 1;
-int updateTest = 1;
-int testUI = 0;
+int visTest = 0;
+int updateTest = 0;
+int testUI = 1;
 
 //TODO SORT OUT Db. Connected, now need to write to and then read from it.
 //Use example data to effect writing via sqlite. 
@@ -44,14 +48,17 @@ int testUI = 0;
 int main(int argc, char** argv) {
 	
 	//UPDATE COMPANY SET ADDRESS = 'Texas' WHERE ID = 6
-	std::string test = insertSpecific("CHARACTER", "NAME", "Caindy BanBo", 0);
+	std::string test = insertSpecific("CHARACTER", "NAME", "Caindy BanBo", 1,true);
 		std::cout << test << std::endl;
+	//AUTOINCREMENT
+	std::string test2 = insertSpecific("CHARACTER", "NAME", "Boshukin BanBo", 0, false);
+	std::cout << test2 << std::endl;
 
     //Create db instance
 	sqlite3 *db;
 	//exit deals with sqlite read and write	
 	int exit = 0;
-	std::string data("CALLBACK FUNCTION");
+	
 	//Open db
 	if (updateTest){ 
 		exit = sqlite3_open("exampleUpdateTest.db", &db); 
@@ -68,25 +75,31 @@ int main(int argc, char** argv) {
 	}
 	//Test Connection
 	dbTest(*db,exit);
-
-	//std::string test(tableBaseCreate());
-	std::string query(queryAllFieldsTable("CHARACTER"));
-	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
-	//exit = sqlite3_exec(db, test.c_str(), callback, (void*)data.c_str(), NULL);
 	
+	//QUERIES AND TABLE SET UP
+	
+	//std::string create(tableBaseCreate());
+	std::string query(queryAllFieldsTable("CHARACTER"));
+	returnThis.clear();
+	identifyThis.clear();
+	//std::string query(removeIDFromTable(5));
+	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
+	//exit = sqlite3_exec(db, create.c_str(), callback, (void*)data.c_str(), NULL);
+	std::cout << "cha count" << chaCount << std::endl << "Id count" << idCount << std::endl;
 	//TEMP UI
-	while (testUI) {
+	if (testUI) {
 		int ui = 1;
 		while (ui) {
 			std::string input;
 			std::cout << "Enter a command ";
 			std::getline(std::cin, input);
 			std::cout << input << std::endl;
-
+			//Exit condition
 			if (input == "exit") {
 				ui = 0;
 			}
-			else if (input == "character view") {
+			else if (input == "view chtr") {
+				
 				//Character *temp = new Character();
 				int idIs;
 				std::cout << "Character id is? ";
@@ -94,28 +107,31 @@ int main(int argc, char** argv) {
 				std::string sql(selectFrom("NAME", "CHARACTER", 1, idIs));
 				exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
 				//temp->setCharacterFromDb(returnThis);//.setCharacterFromDb(returnThis);
-				displayAndError(exit);
-
+				displayAndError(exit, false);
 				//std::cout << temp->getName() << std::endl;
 				returnThis.clear();
+				identifyThis.clear();
 			}
-			else if (input == "set chtr") {
-				std::string choice;
-				std::cout << "What do you want to set?";
-				std::getline(std::cin, choice);
+			else if (input == "update chtr") {
+				std::string choice = inputChtrChoice("What value do you want to set? ");
 				if (choice == "name") {
-					std::string name;
+					std::string name = inputChtrChoice("Choose a name. ");
 					//TEMP
 					int id;
 					id = inputInt();
 					//ENDTEMP
-					std::cout << "Choose a name: ";
-					std::getline(std::cin, name);
 					std::string sql(updateDb("CHARACTER", "NAME", name, id));
 					exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
 				}
-
-
+			}
+			else if (input == "insert chtr") {
+				Character temp;
+				int idToUse = chaCount + 1;
+				std::string choice = inputChtrChoice("What do you want to insert? ");
+				std::string sql(insertSpecific("CHARACTER", "NAME", choice, idToUse, true));
+				exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+				
+				displayAndError(exit,false);
 			}
 		}
 	}
@@ -133,20 +149,6 @@ int main(int argc, char** argv) {
 		Character a1("Mick", 55, "Nice enough, but... ", "Stealing and love", "Chromeman");
 		Character a2("Nan", 700, "An old nan", "Getting blood out of the carpet", "Serpent");
 		
-		//TEST INHERITANCE
-		/*Character testBoy;
-		Scene testScene;
-		NarativeGeneralInfo testNGI;
-		printNarativeGeneralInfo(testNGI);
-		printSceneInfo(testScene,true);
-		testBoy.setName("TestMan");
-		printCharacterInfo(testBoy);
-		Chapter testChapter;
-		testChapter.setDescription("A non-existent chapter, soley for test purposes ");
-		std::cout << "TESTING TESTING: " << testChapter.getDescription() << std::endl;
-		printChapterInfo(testChapter);*/
-		//END TEST
-
 		//Set Some Names and ages
 		c1.setName("Mark");
 		c1.setCharacterAge(6);
@@ -158,9 +160,9 @@ int main(int argc, char** argv) {
 		c2.setDescription("Teenage girl");
 
 		//Evidence 'notes' working.
-		a1.setNotes("Always, he gets into the fighting on tarmac over beer.\n"
-			"'Why are you like this?' is the sort of thing his wife asks.\n"
-			"'My Dyspraxia drives me to it, NOW LEAVE ME!' would be a typical reply.");
+		//a1.setNotes("Always, he gets into the fighting on tarmac over beer.\n"
+		//	"'Why are you like this?' is the sort of thing his wife asks.\n"
+		//	"'My Dyspraxia drives me to it, NOW LEAVE ME!' would be a typical reply.");
 
 		/*std::string sql(insertCharacter(c1,1));
 		exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
@@ -175,7 +177,8 @@ int main(int argc, char** argv) {
 		 sql = (insertCharacter(a2, 6));
 		exit = exit = sqlite3_exec(db, sql.c_str(), callback, 0, &errMsg);
 		*/
-
+		//std::string sql22(insertCharacter(a1, 5));
+		//sqlite3_exec(db, sql22.c_str(), callback, 0, &errMsg);
 		sqlite3_close(db);
 		//END DB STUFF
 
@@ -255,11 +258,15 @@ int callback(void* data, int argc, char** argv, char** azColName) {
 	int i;
 	std::string toReturn;
 	fprintf(stderr, "%s: ", (const char*)data);
+	chaCount += 1;
+	idCount += 1;
 	//Recieve data
 	for (i = 0; i < argc; i++) {
 		printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
 		//Return to global
-		returnThis.push_back(argv[i]);
+		if (argv[i]) {
+			returnThis.push_back(argv[i]);	
+		}
 		identifyThis.push_back(azColName[i]);
 	}
 
@@ -267,15 +274,17 @@ int callback(void* data, int argc, char** argv, char** azColName) {
 	
 	return 0; }
 
-void displayAndError(int exit)
+void displayAndError(int exit, bool display)
 {
-	for (size_t retList = 0; retList < returnThis.size(); retList++) {
-		std::cout << "Output from db= " << returnThis.at(retList) <<
-			" Identity= " << identifyThis.at(retList) << std::endl;
+	if (display == true) {
+		for (size_t retList = 0; retList < returnThis.size(); retList++) {
+			std::cout << "Output from db= " << returnThis.at(retList) <<
+				" Identity= " << identifyThis.at(retList) << std::endl;
+		}
 	}
 	if (exit != SQLITE_OK) {
 		std::cerr << "Error Insert" << std::endl;
-		sqlite3_free(errMsg);
+		
 	}
 
 }
@@ -305,6 +314,14 @@ int inputInt()
 		std::cout << "Invalid number, please try again" << std::endl;
 	}
 	return id;
+}
+
+std::string inputChtrChoice(std::string message)
+{
+	std::string choice;
+	std::cout << message;
+	std::getline(std::cin, choice);
+	return choice; 
 }
 
 void printSceneInfo(Scene scene, bool charInfoOn)

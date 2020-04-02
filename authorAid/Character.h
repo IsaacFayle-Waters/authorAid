@@ -17,6 +17,7 @@ private:
 	
 public:	
 	Character();
+	~Character();
 	Character(std::string name, int age, std::string description, 
 				std::string motive, std::string gender);
 	

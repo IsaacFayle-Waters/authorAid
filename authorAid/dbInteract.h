@@ -14,8 +14,8 @@ std::string removeIDFromTable(int id);
 std::string selectFrom(std::string selection, std::string fromTable, int limit, int offset);
 //Update values
 std::string updateDb(std::string table, std::string column, std::string value, int id);
-
-std::string insertSpecific(std::string table, std::string column, std::string value, int id);
+//Insert new item into table, via specific sql string.
+std::string insertSpecific(std::string table, std::string column, std::string value, int id, bool idOnOff);
 
 //Character loader
 //possibly tempory function because I'm bored. Find better way later.
