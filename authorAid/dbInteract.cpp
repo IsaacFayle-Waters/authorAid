@@ -4,7 +4,7 @@
 #include <sqlite3.h>
 
 std::string tableBaseCreate()
-{
+{  //INTEGER PRIMARY KEY MAY AUTOMATE THE INDEXING
 	std::string tableString = 
 		"CREATE TABLE IF NOT EXISTS CHARACTER("
 		"ID INT PRIMARY KEY     NOT NULL, "

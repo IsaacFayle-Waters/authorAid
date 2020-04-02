@@ -89,6 +89,7 @@ int main(int argc, char** argv) {
 	//TEMP UI
 	if (testUI) {
 		int ui = 1;
+		
 		while (ui) {
 			std::string input;
 			std::cout << "Enter a command ";
@@ -106,6 +107,8 @@ int main(int argc, char** argv) {
 				idIs = inputInt();
 				std::string sql(selectFrom("NAME", "CHARACTER", 1, idIs));
 				exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+				chaCount -= 1;
+
 				//temp->setCharacterFromDb(returnThis);//.setCharacterFromDb(returnThis);
 				displayAndError(exit, false);
 				//std::cout << temp->getName() << std::endl;
@@ -125,12 +128,19 @@ int main(int argc, char** argv) {
 				}
 			}
 			else if (input == "insert chtr") {
-				Character temp;
-				int idToUse = chaCount + 1;
-				std::string choice = inputChtrChoice("What do you want to insert? ");
-				std::string sql(insertSpecific("CHARACTER", "NAME", choice, idToUse, true));
+				chaCount += 1;
+				Character tempChtr;
+				int idToUse = chaCount;
+				std::cout << chaCount << std::endl;
+				//std::string choice = inputChtrChoice("What do you want to insert? ");
+
+				tempChtr.setName(inputChtrChoice("What do you want to insert? "));
+				//std::string sql(insertSpecific("CHARACTER", "NAME", tempChtr.getName(), idToUse, true));
+				std::string sql(insertCharacter(tempChtr, idToUse));
+				std::cout << sql << std::endl;
 				exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
-				
+				tempChtr.~Character();
+				//Error message for insert
 				displayAndError(exit,false);
 			}
 		}
