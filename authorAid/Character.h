@@ -15,7 +15,6 @@ private:
 	std::string gender = "Unknown Gender";
 	//std::string notes = "No notes";
 	
-	bool characterExists = false;
 public:	
 	Character();
 	Character(std::string name, int age, std::string description, 
@@ -38,7 +37,7 @@ public:
 	
 	//void setNotes(std::string notes);
 	//std::string getNotes() { return notes; };
-
+	
 	void setCharacterFromDb(std::vector <std::string> dbreturn);
 };
 

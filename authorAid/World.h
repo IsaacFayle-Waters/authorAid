@@ -1,18 +1,21 @@
 #pragma once
+#include <iostream>
 #include <string>
 //In depth look at the world the narrative takes place in.  
 //TODO
 class World
 {
 
-private: 
+private:
 	int characterCount = 0;
 	int locationCount = 0;
 	int sceneCount = 0;
 
 	std::string name = "No Name";
-	std::string description = "No Description W";
-	std::string notes = "No Notes W";
+	std::string description = "No Description";
+	std::string notes = "No Notes";
+
+	bool exists = false;
 
 public:
 	void setName(std::string name);
@@ -24,6 +27,9 @@ public:
 	void setNotes(std::string notes);
 	std::string getNotes() { return notes; };
 
+	void setExistence();
+	bool getExistence() { return exists; };
+};
 //General information about Places
 	//List of places (Subplaces?)
 //What sort of universe or environment does the story take place?
@@ -59,5 +65,5 @@ public:
 	
 
 
-};  
+  
    

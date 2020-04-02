@@ -15,6 +15,7 @@
 #include "narativeGeneralInfo.h"
 #include "Chapter.h"
 #include "dbInteract.h"
+#include "Location.h"
 
 void printSceneInfo(Scene scene, bool charInfoOn);
 void printCharacterInfo(Character character);
@@ -133,7 +134,7 @@ int main(int argc, char** argv) {
 		Character a2("Nan", 700, "An old nan", "Getting blood out of the carpet", "Serpent");
 		
 		//TEST INHERITANCE
-		Character testBoy;
+		/*Character testBoy;
 		Scene testScene;
 		NarativeGeneralInfo testNGI;
 		printNarativeGeneralInfo(testNGI);
@@ -143,7 +144,7 @@ int main(int argc, char** argv) {
 		Chapter testChapter;
 		testChapter.setDescription("A non-existent chapter, soley for test purposes ");
 		std::cout << "TESTING TESTING: " << testChapter.getDescription() << std::endl;
-		printChapterInfo(testChapter);
+		printChapterInfo(testChapter);*/
 		//END TEST
 
 		//Set Some Names and ages

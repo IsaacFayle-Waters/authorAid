@@ -11,6 +11,7 @@ Character::Character(std::string name, int age, std::string description,
 	setDescription(description);
 	setMotive(motive);
 	setGender(gender);
+	
 };
 /*void Character::setCharacterName(std::string name)
 {
