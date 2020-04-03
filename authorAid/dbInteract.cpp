@@ -42,7 +42,17 @@ std::string tableBaseCreate()
 		"GEN_DSCRPT		TEXT		 NULL, "
 		"CHAPTERS		BLOB		 NULL, "
 		"NUM_CHAPTERS   INT		 NOT NULL, "
-		"NOTES			TEXT		 NULL);"			
+		"NOTES			TEXT		 NULL);"
+
+		"CREATE TABLE IF NOT EXISTS WORLD("
+		"ID INT PRIMARY KEY      NOT NULL, "
+		"CHA_COUNT      INT		 NOT NULL, "
+		"LOC_COUNT		INT		 NOT NULL, "
+		"SCENE_COUNT    INT		 NOT NULL, "
+		"NAME			TEXT		 NULL, "
+		"DESCRIPTION    TEXT         NULL, "
+		"NOTES          TEXT         NULL, "
+		"EXISTS_BOOL    INT      NOT NULL);"
 		;
 
 	return tableString;

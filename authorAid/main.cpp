@@ -78,13 +78,13 @@ int main(int argc, char** argv) {
 	
 	//QUERIES AND TABLE SET UP
 	
-	//std::string create(tableBaseCreate());
+	std::string create(tableBaseCreate());
 	std::string query(queryAllFieldsTable("CHARACTER"));
 	returnThis.clear();
 	identifyThis.clear();
 	//std::string query(removeIDFromTable(5));
 	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
-	//exit = sqlite3_exec(db, create.c_str(), callback, (void*)data.c_str(), NULL);
+	exit = sqlite3_exec(db, create.c_str(), callback, (void*)data.c_str(), NULL);
 	std::cout << "cha count" << chaCount << std::endl << "Id count" << idCount << std::endl;
 	//TEMP UI
 	if (testUI) {
@@ -129,22 +129,54 @@ int main(int argc, char** argv) {
 			}
 			else if (input == "insert chtr") {
 				chaCount += 1;
+				int exitInsert = 1;
 				Character tempChtr;
-				int idToUse = chaCount;
-				std::cout << chaCount << std::endl;
-				//std::string choice = inputChtrChoice("What do you want to insert? ");
-
-				tempChtr.setName(inputChtrChoice("What do you want to insert? "));
-				//std::string sql(insertSpecific("CHARACTER", "NAME", tempChtr.getName(), idToUse, true));
-				std::string sql(insertCharacter(tempChtr, idToUse));
-				std::cout << sql << std::endl;
-				exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
-				tempChtr.~Character();
-				//Error message for insert
-				displayAndError(exit,false);
+				while (exitInsert) {
+					std::cout << "Character insert: please choose an attribute to insert." << std::endl <<
+						"(n)ame, (a)ge, (d)escription, (m)otive,(g)ender,(notes)." << std::endl <<
+						"(v)iew Character (save) Or (exit)." << std::endl;
+					std::string inputINS;
+					std::getline(std::cin, inputINS);
+					
+					std::cout << chaCount << std::endl;
+					if (inputINS == "exit") {
+						exitInsert = 0;
+						tempChtr.~Character();
+						break;
+					}
+					else if (inputINS == "n") {
+						tempChtr.setName(inputChtrChoice("What name do you want to insert? "));
+					}
+					else if (inputINS == "a") {
+						std::cout << "Enter an age: " << std::endl;
+						tempChtr.setCharacterAge(inputInt());
+					}
+					else if (inputINS == "d") {
+						tempChtr.setDescription(inputChtrChoice("Describe the character: "));
+					}
+					else if (inputINS == "m") {
+						tempChtr.setMotive(inputChtrChoice("What is the character's motive? "));
+					}
+					else if (inputINS == "g") {
+						tempChtr.setGender(inputChtrChoice("Assign a gender? "));
+					}
+					else if (inputINS == "notes") {
+						tempChtr.setNotes(inputChtrChoice("Do you have any notes to make about this character?"));
+					}
+					else if (inputINS == "v") {
+						printCharacterInfo(tempChtr);
+					}
+					else if (inputINS == "save") {
+						std::string sql(insertCharacter(tempChtr, chaCount));
+						exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+					}
+					//Error message for insert
+					displayAndError(exit, false);
+				}
 			}
 		}
 	}
+	//TEMPORARY EARLY TESTING. WILL BE REMOVED FOLLOWING IMPROVEMENTS
 	if (visTest) {
 		//Create Characters
 		Character c1;
@@ -189,7 +221,7 @@ int main(int argc, char** argv) {
 		*/
 		//std::string sql22(insertCharacter(a1, 5));
 		//sqlite3_exec(db, sql22.c_str(), callback, 0, &errMsg);
-		sqlite3_close(db);
+		//sqlite3_close(db);
 		//END DB STUFF
 
 		//Creating scenes (Uh oh!)
@@ -327,7 +359,7 @@ int inputInt()
 }
 
 std::string inputChtrChoice(std::string message)
-{
+{	
 	std::string choice;
 	std::cout << message;
 	std::getline(std::cin, choice);
