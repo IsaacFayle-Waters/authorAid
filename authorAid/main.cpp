@@ -23,7 +23,9 @@ void printChapterInfo(Chapter chapter);
 void printNarativeGeneralInfo(NarativeGeneralInfo ngi);
 int callback(void* data, int argc, char** argv, char** azColName);
 void displayAndError(int exit, bool display);
-int dbTest(struct sqlite3 &db, int exit);
+//DB TEST DOES NOT WORK!!!//////////////////
+int dbTest(struct sqlite3 &db, int exit);//
+//////////////////////////////////////////
 int inputInt();
 std::string inputChtrChoice(std::string message);
 std::string data("CALLBACK FUNCTION");
@@ -39,7 +41,7 @@ int idCount = 0;
 char* errMsg = 0;
 //Testing from manually set values on/off
 int visTest = 0;
-int updateTest = 1;
+int updateTest = 0;
 int testUI = 1;
 
 //TODO include "exists" into relevent tables and sqlite queries.
@@ -70,8 +72,9 @@ int main(int argc, char** argv) {
 	returnThis.clear();
 	identifyThis.clear();
 	//std::string query(removeIDFromTable(5));
+	//std::string query("VACUUM;");
 	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
-	exit = sqlite3_exec(db, create.c_str(), callback, (void*)data.c_str(), NULL);
+	//exit = sqlite3_exec(db, create.c_str(), callback, (void*)data.c_str(), NULL);
 	std::cout << "cha count" << chaCount << std::endl << "Id count" << idCount << std::endl;
 	//////////////////////
 	//TEMP UI OFF OR ON//
@@ -104,19 +107,6 @@ int main(int argc, char** argv) {
 				returnThis.clear();
 				identifyThis.clear();
 			}
-			//Update Character. May merge with insert. //OBSOLETE 
-			/*else if (input == "update chtr") {
-				std::string choice = inputChtrChoice("What value do you want to set? ");
-				if (choice == "name") {
-					std::string name = inputChtrChoice("Choose a name. ");
-					//TEMP
-					int id;
-					id = inputInt();
-					//ENDTEMP
-					std::string sql(updateDb("CHARACTER", "NAME", name, id));
-					exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
-				}
-			}*/
 			//Insert a charcter, having assigned some or all details (I don't like switch statements)
 			else if (input == "insert chtr") {
 				//Global character count
@@ -403,6 +393,7 @@ int inputInt()
 	}
 	return id;
 }
+
 //Return a string. Helper. Mostly for making choices.
 std::string inputChtrChoice(std::string message)
 {	
