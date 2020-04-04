@@ -31,53 +31,40 @@ std::string data("CALLBACK FUNCTION");
 //Return strings from db (identifyThis possibly redundant)
 std::vector <std::string> returnThis;
 std::vector <std::string> identifyThis;
+//GLOBAL CHARACTER COUNT, CURRENTLY DRAWN FROM CALLBACK FUNCTION, BUT MUST CHANGE TO DB.
 int chaCount = 0;
+//Used in a display function. Possibly redundent
 int idCount = 0;
-//save error messages
+//save error messages. Possibly only used in test functions.
 char* errMsg = 0;
-//Visual testing from manually set values on/off
+//Testing from manually set values on/off
 int visTest = 0;
-int updateTest = 0;
+int updateTest = 1;
 int testUI = 1;
 
-//TODO SORT OUT Db. Connected, now need to write to and then read from it.
-//Use example data to effect writing via sqlite. 
-//TODO finish creating tables
+//TODO include "exists" into relevent tables and sqlite queries.
+//TODO Set "chaCount" to be provided by World table, instead of callback function. Remove the counter from callback.
 //TODO GUI
 
 int main(int argc, char** argv) {
-	
-	//UPDATE COMPANY SET ADDRESS = 'Texas' WHERE ID = 6
-	std::string test = insertSpecific("CHARACTER", "NAME", "Caindy BanBo", 1,true);
-		std::cout << test << std::endl;
-	//AUTOINCREMENT
-	std::string test2 = insertSpecific("CHARACTER", "NAME", "Boshukin BanBo", 0, false);
-	std::cout << test2 << std::endl;
 
     //Create db instance
 	sqlite3 *db;
 	//exit deals with sqlite read and write	
 	int exit = 0;
-	
 	//Open db
+	//TESTING PURPOSES DBs
 	if (updateTest){ 
 		exit = sqlite3_open("exampleUpdateTest.db", &db); 
-		if (exit) {
-			std::cerr << "Error open db" << sqlite3_errmsg(db) << std::endl;
-			return(-1);
-		}
-		else {
-			std::cout << "Opened Database Successfully!" << std::endl;
-		}
+		dbTest(*db, exit);
 	}
 	else {
 		exit = sqlite3_open("example.db", &db);
+		//Test Connection
+		dbTest(*db, exit);
 	}
-	//Test Connection
-	dbTest(*db,exit);
 	
 	//QUERIES AND TABLE SET UP
-	
 	std::string create(tableBaseCreate());
 	std::string query(queryAllFieldsTable("CHARACTER"));
 	returnThis.clear();
@@ -86,36 +73,39 @@ int main(int argc, char** argv) {
 	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
 	exit = sqlite3_exec(db, create.c_str(), callback, (void*)data.c_str(), NULL);
 	std::cout << "cha count" << chaCount << std::endl << "Id count" << idCount << std::endl;
-	//TEMP UI
+	//////////////////////
+	//TEMP UI OFF OR ON//
+	////////////////////
 	if (testUI) {
 		int ui = 1;
-		
+		/////////////////
+		//MAIN UI LOOP//
+		///////////////
 		while (ui) {
+			//MAIN INPUT//
 			std::string input;
-			std::cout << "Enter a command ";
+			std::cout << "Enter a command: view chtr, insert chtr, exit. " <<std::endl;
 			std::getline(std::cin, input);
 			std::cout << input << std::endl;
-			//Exit condition
+			//Exit condition//
 			if (input == "exit") {
 				ui = 0;
 			}
+			//View Character//
 			else if (input == "view chtr") {
-				
-				//Character *temp = new Character();
 				int idIs;
 				std::cout << "Character id is? ";
-				idIs = inputInt();
-				std::string sql(selectFrom("NAME", "CHARACTER", 1, idIs));
+				idIs = inputInt() - 1;
+				std::string sql(selectFrom("NAME, AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER", 1, idIs));
 				exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
 				chaCount -= 1;
 
-				//temp->setCharacterFromDb(returnThis);//.setCharacterFromDb(returnThis);
 				displayAndError(exit, false);
-				//std::cout << temp->getName() << std::endl;
 				returnThis.clear();
 				identifyThis.clear();
 			}
-			else if (input == "update chtr") {
+			//Update Character. May merge with insert. //OBSOLETE 
+			/*else if (input == "update chtr") {
 				std::string choice = inputChtrChoice("What value do you want to set? ");
 				if (choice == "name") {
 					std::string name = inputChtrChoice("Choose a name. ");
@@ -126,53 +116,109 @@ int main(int argc, char** argv) {
 					std::string sql(updateDb("CHARACTER", "NAME", name, id));
 					exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
 				}
-			}
+			}*/
+			//Insert a charcter, having assigned some or all details (I don't like switch statements)
 			else if (input == "insert chtr") {
+				//Global character count
 				chaCount += 1;
+				int hold = chaCount;
+				//exit condition
 				int exitInsert = 1;
+				//Character class temp
 				Character tempChtr;
+				bool fromLoad = false;
+				int tempChaCount = 0;
+				//////////////////////////
+				//Main insert chtr loop//
+				////////////////////////
 				while (exitInsert) {
 					std::cout << "Character insert: please choose an attribute to insert." << std::endl <<
 						"(n)ame, (a)ge, (d)escription, (m)otive,(g)ender,(notes)." << std::endl <<
-						"(v)iew Character (save) Or (exit)." << std::endl;
+						"(v)iew Character, (save), (load), Or (exit)." << std::endl;
+					//input string
 					std::string inputINS;
 					std::getline(std::cin, inputINS);
-					
+					//check position in db
 					std::cout << chaCount << std::endl;
+					//Exit Condition
 					if (inputINS == "exit") {
 						exitInsert = 0;
 						tempChtr.~Character();
 						break;
 					}
+					//Enter Name
 					else if (inputINS == "n") {
 						tempChtr.setName(inputChtrChoice("What name do you want to insert? "));
 					}
+					//Enter Age
 					else if (inputINS == "a") {
 						std::cout << "Enter an age: " << std::endl;
 						tempChtr.setCharacterAge(inputInt());
 					}
+					//Enter Description
 					else if (inputINS == "d") {
 						tempChtr.setDescription(inputChtrChoice("Describe the character: "));
 					}
+					//Enter Motive
 					else if (inputINS == "m") {
 						tempChtr.setMotive(inputChtrChoice("What is the character's motive? "));
 					}
+					//Enter Gender
 					else if (inputINS == "g") {
 						tempChtr.setGender(inputChtrChoice("Assign a gender? "));
 					}
+					//Enter Notes
 					else if (inputINS == "notes") {
-						tempChtr.setNotes(inputChtrChoice("Do you have any notes to make about this character?"));
+						tempChtr.setNotes(inputChtrChoice("Do you have any notes to make about this character? "));
 					}
+					//View Character
 					else if (inputINS == "v") {
 						printCharacterInfo(tempChtr);
 					}
+					//Save Character's details to table or Update Charcter's details.
 					else if (inputINS == "save") {
-						std::string sql(insertCharacter(tempChtr, chaCount));
+						if (fromLoad == true) {
+							chaCount = tempChaCount;
+						}
+						if (tempChtr.getExistence() == false) {
+							std::string sql(insertCharacter(tempChtr, chaCount,0));
+							exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+							tempChtr.setExistence();
+						}
+						else if (tempChtr.getExistence() == true) {
+							std::string sql(insertCharacter(tempChtr, chaCount, 1));
+							exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+						}
+					}
+					//Load Caracter from db To update feilds
+					else if (inputINS == "load") {
+						///Display all Characters
+						std::string sql(selectFrom("ID,NAME", "CHARACTER", chaCount, 0));
 						exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+						//Select Character by ID number
+						std::cout << "Select Character ID from list: ";
+						int idLoadChoice = tempChaCount  = inputInt() - 1;
+						
+						returnThis.clear();
+						sql = (selectFrom("ID,NAME,AGE, DESCRIPTION, MOTIVE, GENDER, NOTES","CHARACTER", 1, idLoadChoice));
+						exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+						//Add details to temp instance
+						tempChtr.~Character();
+						tempChtr.setCharacterFromDb(returnThis);
+						//Display loaded character
+						printCharacterInfo(tempChtr);
+						//clear return
+						returnThis.clear();
+						//????????????????????//
+						tempChtr.setExistence();
+						//Confirm that Character is prodeuct of "load"
+						fromLoad = true;
 					}
 					//Error message for insert
 					displayAndError(exit, false);
+					chaCount = hold;
 				}
+				chaCount = hold;
 			}
 		}
 	}
@@ -330,7 +376,7 @@ void displayAndError(int exit, bool display)
 	}
 
 }
-//Possibly not right? Need to research pointers more.
+//DOESN'T WORK!!!! WOW!!!!!!
 int dbTest(struct sqlite3 &db, int exit)
 {
 	if (exit) {
@@ -341,13 +387,13 @@ int dbTest(struct sqlite3 &db, int exit)
 		std::cout << "Opened Database Successfully!" << std::endl;
 	}
 }
-
+//Safley input integer, and parse.
 int inputInt()
 {
 	std::string input = "";
 	int id;
 	while (true) {
-		std::cout << "Please enter a valid ID number: ";
+		std::cout << "Please enter a valid number: ";
 		std::getline(std::cin, input);
 		// This converts from string to int.
 		std::stringstream myStream(input);
@@ -357,7 +403,7 @@ int inputInt()
 	}
 	return id;
 }
-
+//Return a string. Helper. Mostly for making choices.
 std::string inputChtrChoice(std::string message)
 {	
 	std::string choice;
@@ -365,7 +411,7 @@ std::string inputChtrChoice(std::string message)
 	std::getline(std::cin, choice);
 	return choice; 
 }
-
+//Print scenes
 void printSceneInfo(Scene scene, bool charInfoOn)
 {
 	//General information about the scene, from Scene.
@@ -399,7 +445,7 @@ void printSceneInfo(Scene scene, bool charInfoOn)
 	}
 	else { /*nothing*/ }
 }
-
+//Print Characters
 void printCharacterInfo(Character character)
 {
 	std::cout << character.getName() << "'s details." << std::endl <<
@@ -409,7 +455,7 @@ void printCharacterInfo(Character character)
 		"Gender: " << character.getGender() << std::endl << 
 		"Notes: " << character.getNotes() << std::endl << std::endl;
 }
-
+//Print Chapters
 void printChapterInfo(Chapter chapter)
 {   //Number of scenes
 	std::cout << "Chapter No: " << chapter.getChapterNumber() << std::endl;
@@ -432,7 +478,7 @@ void printChapterInfo(Chapter chapter)
 	else { std::cout << "No Scenes to display"; }
 	std::cout << std::endl;
 }
-
+//Print NGI
 void printNarativeGeneralInfo(NarativeGeneralInfo ngi)
 {
 	std::cout << "Title: ";

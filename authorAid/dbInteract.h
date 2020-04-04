@@ -17,9 +17,8 @@ std::string updateDb(std::string table, std::string column, std::string value, i
 //Insert new item into table, via specific sql string.
 std::string insertSpecific(std::string table, std::string column, std::string value, int id, bool idOnOff);
 
-//Character loader
-//possibly tempory function because I'm bored. Find better way later.
-//More of a test
-std::string insertCharacter(Character character, int index);
+//Character loader/Updater
+std::string insertCharacter(Character character, int index, int Update_1_Insert_0);
+
 
 

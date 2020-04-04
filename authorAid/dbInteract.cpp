@@ -109,10 +109,14 @@ std::string insertSpecific(std::string table, std::string column, std::string va
 		std::cout <<std::endl << sql << std::endl;
 		return sql;
 	}
+	else {
+		std::cout << std::endl << "ERROR SELECTION" << std::endl;
+		return "";
+	}
 }
 //Might find that this is redundant, but helpful for now in populating db.
-std::string insertCharacter(Character character,int index)
-{
+std::string insertCharacter(Character character,int index, int Update_1_Insert_0)
+{  
 	std::string newdex = std::to_string(index);
 	std::string name = character.getName();
 	int ageTemp = character.getCharacterAge();
@@ -121,7 +125,19 @@ std::string insertCharacter(Character character,int index)
 	std::string motive = character.getMotive();
 	std::string gender = character.getGender();
 	std::string notes = character.getNotes();
-	std::string sql("INSERT INTO CHARACTER VALUES("+ newdex +",'"+ name +"',"+ age +",'"+description+"',"
-					"'"+ motive +"','"+gender+"', '"+notes+"');");
-	return sql;
+	if (Update_1_Insert_0 == 0) {
+		std::string sql("INSERT INTO CHARACTER VALUES(" + newdex + ",'" + name + "'," + age + ",'" + description + "',"
+			"'" + motive + "','" + gender + "', '" + notes + "');");
+		return sql;
+	}
+	else if (Update_1_Insert_0 == 1) {
+		std::string sql("UPDATE CHARACTER SET NAME = '" + name + "', AGE = " + age + ", DESCRIPTION = '" + description + "', "    
+						"MOTIVE = '" + motive + "', GENDER = '" + gender + "', NOTES = '" + notes + "' WHERE ID = " + newdex + ";");
+		return sql;
+	}
+	else {
+		std::cout << std::endl << "ERROR SELECTION" << std::endl;
+		return "";
+	}
 }
+

@@ -4,6 +4,7 @@
 #include "World.h"
 #include <string>
 #include <vector>
+#include <sstream>
 
 class Character: public World
 {
