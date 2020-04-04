@@ -124,7 +124,7 @@ int main(int argc, char** argv) {
 				while (exitInsert) {
 					std::cout << "Character insert: please choose an attribute to insert." << std::endl <<
 						"(n)ame, (a)ge, (d)escription, (m)otive,(g)ender,(notes)." << std::endl <<
-						"(v)iew Character, (save), (load), Or (exit)." << std::endl;
+						"(v)iew Character, (save), (load), (del)ete, Or (exit)." << std::endl;
 					//input string
 					std::string inputINS;
 					std::getline(std::cin, inputINS);
@@ -185,12 +185,18 @@ int main(int argc, char** argv) {
 						///Display all Characters
 						std::string sql(selectFrom("ID,NAME", "CHARACTER", chaCount, 0));
 						exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+						chaCount = hold;
 						//Select Character by ID number
-						std::cout << "Select Character ID from list: ";
+						std::cout << "Select Character ID from list, or -1 to cancel: ";
 						int idLoadChoice = tempChaCount  = inputInt() - 1;
-						
+						if (idLoadChoice < 0 || idLoadChoice > chaCount) {
+							std::cout << "Load Cancelled" << std::endl;
+							
+							break;
+						}
 						returnThis.clear();
 						sql = (selectFrom("ID,NAME,AGE, DESCRIPTION, MOTIVE, GENDER, NOTES","CHARACTER", 1, idLoadChoice));
+						
 						exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
 						//Add details to temp instance
 						tempChtr.~Character();
@@ -203,6 +209,21 @@ int main(int argc, char** argv) {
 						tempChtr.setExistence();
 						//Confirm that Character is prodeuct of "load"
 						fromLoad = true;
+					}
+					else if (inputINS == "del") {
+						std::string sql(selectFrom("ID,NAME", "CHARACTER", chaCount, 0));
+						exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+						chaCount = hold;
+						
+						int delChoice = inputInt();
+						std::cout << delChoice;
+						std::string remove(removeIDFromTable("CHARACTER", delChoice));
+						exit = sqlite3_exec(db, remove.c_str(), callback, NULL, NULL);
+						
+
+						std::string sql2(selectFrom("ID,NAME", "CHARACTER", chaCount, 0));
+						exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+						chaCount = hold;
 					}
 					//Error message for insert
 					displayAndError(exit, false);

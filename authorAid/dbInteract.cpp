@@ -71,10 +71,10 @@ std::string dropT(std::string table)
 	return sql;
 }
 //remove in relation to id
-std::string removeIDFromTable(int id)
+std::string removeIDFromTable(std::string table,int id)
 {
 	std::string sID = std::to_string(id);
-	std::string sql = "DELETE FROM CHARACTER WHERE ID = "+sID+";";
+	std::string sql = "DELETE FROM "+ table +" WHERE ID = "+sID+";";
 
 	return sql;
 }

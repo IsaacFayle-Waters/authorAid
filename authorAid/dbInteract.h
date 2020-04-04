@@ -9,7 +9,7 @@ std::string queryAllFieldsTable(std::string tableName);
 //Delete table
 std::string dropT(std::string table);
 //Remove table
-std::string removeIDFromTable(int id);
+std::string removeIDFromTable(std::string table, int id);
 //select something from table
 std::string selectFrom(std::string selection, std::string fromTable, int limit, int offset);
 //Update values

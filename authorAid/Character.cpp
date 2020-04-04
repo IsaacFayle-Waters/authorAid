@@ -43,19 +43,23 @@ void Character::setGender(std::string gender)
 };*/
 void Character::setCharacterFromDb(std::vector<std::string> dbreturn)
 {
-	setName(dbreturn.at(1));
-	if (dbreturn.at(2) != "NULL") {
-		int id;
-		std::string input = dbreturn.at(2);
-		std::stringstream myStream(input);
-		myStream >> id;
-		
-		int ageDb = id;//std::stoi(dbreturn.at(1));
-		setCharacterAge(ageDb);
+	
+		setName(dbreturn.at(1));
+		if (dbreturn.at(2) != "NULL") {
+			int id;
+			std::string input = dbreturn.at(2);
+			std::stringstream myStream(input);
+			myStream >> id;
+
+			int ageDb = id;//std::stoi(dbreturn.at(1));
+			setCharacterAge(ageDb);
+		}
+		else {
+			std::cerr << "Error!!!!" << std::endl;
+		}
+		setDescription(dbreturn.at(3));
+		setMotive(dbreturn.at(4));
+		setGender(dbreturn.at(5));
+		setNotes(dbreturn.at(6));
 	}
-	setDescription(dbreturn.at(3));
-	setMotive(dbreturn.at(4));
-	setGender(dbreturn.at(5));
-	setNotes(dbreturn.at(6));
-}
-;
+	;
