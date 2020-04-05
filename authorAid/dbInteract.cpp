@@ -1,7 +1,12 @@
 #include "dbInteract.h"
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <sqlite3.h>
+#include <vector>
+
+std::vector <std::string> returnCount;
+std::string data2("");
 
 std::string tableBaseCreate()
 {  //INTEGER PRIMARY KEY MAY AUTOMATE THE INDEXING
@@ -13,7 +18,8 @@ std::string tableBaseCreate()
 		"DESCRIPTION    TEXT		NULL, "
 		"MOTIVE         TEXT		NULL, "
 		"GENDER         TEXT		NULL, "
-		"NOTES          TEXT		NULL );"
+		"NOTES          TEXT		NULL, "
+		"EXISTS_BOOL    INT      NOT NULL);"
 		
 		"CREATE TABLE IF NOT EXISTS SCENE("
 		"ID INT PRIMARY KEY     NOT NULL,  "
@@ -141,3 +147,52 @@ std::string insertCharacter(Character character,int index, int Update_1_Insert_0
 	}
 }
 
+int countersWorld(char dbNameString[],int chaCount, std::string readOrWrite)
+{
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
+	std::string chaCounter = std::to_string(chaCount);
+
+	if (readOrWrite == "read") {
+		int ret = 0;
+		
+		std::string sqlRead("SELECT CHA_COUNT FROM WORLD;"); 
+		exit = sqlite3_exec(db, sqlRead.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
+		std::string retCount = returnCount.at(0);
+
+		std::stringstream myStream(retCount);
+		myStream >> ret;
+		returnCount.clear();
+		errorInsert(exit);
+		return ret;
+	}
+	else if (readOrWrite == "write") {
+		
+		std::string sqlWrite("UPDATE WORLD SET CHA_COUNT = " + chaCounter + ";");
+		exit = sqlite3_exec(db, sqlWrite.c_str(),0, 0, NULL);
+		errorInsert(exit);
+	}
+	else {
+		std::cerr << "Counter error" << std::endl;
+	}
+	sqlite3_close(db);
+}
+
+void errorInsert(int exit) {
+	if (exit != SQLITE_OK) {
+		std::cerr << "Error Insert" << std::endl;
+	}
+}
+
+int callbackDbInter(void* data, int argc, char** argv, char** azColName) {
+	
+	int i;
+	//Recieve data
+	for (i = 0; i < argc; i++) {
+		if (argv[i]) {
+			returnCount.push_back(argv[i]);	
+		}
+	}
+	return 0;
+}

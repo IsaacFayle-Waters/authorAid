@@ -28,20 +28,26 @@ int dbTest(struct sqlite3 &db, int exit);//
 //////////////////////////////////////////
 int inputInt();
 std::string inputChtrChoice(std::string message);
+//Strings
 std::string data("CALLBACK FUNCTION");
+char dbNameString[] = "counterTest.db";
+char dbNameString0[] = "exampleUpdateTest.db";
+char dbNameString2[] = "example.db";
 
 //Return strings from db (identifyThis possibly redundant)
 std::vector <std::string> returnThis;
 std::vector <std::string> identifyThis;
 //GLOBAL CHARACTER COUNT, CURRENTLY DRAWN FROM CALLBACK FUNCTION, BUT MUST CHANGE TO DB.
 int chaCount = 0;
+int tempChaCountWorld = 131;
+
 //Used in a display function. Possibly redundent
 int idCount = 0;
 //save error messages. Possibly only used in test functions.
 char* errMsg = 0;
 //Testing from manually set values on/off
 int visTest = 0;
-int updateTest = 0;
+int updateTest = 1;
 int testUI = 1;
 
 //TODO include "exists" into relevent tables and sqlite queries.
@@ -49,33 +55,45 @@ int testUI = 1;
 //TODO GUI
 
 int main(int argc, char** argv) {
-
+	int woo = countersWorld(dbNameString, 0, "read");
+	std::cout << "woo: " << woo << std::endl;
+	countersWorld(dbNameString, tempChaCountWorld, "write");
+    woo = countersWorld(dbNameString, 0, "read");
+	std::cout << "woo: " << woo << std::endl;
     //Create db instance
 	sqlite3 *db;
 	//exit deals with sqlite read and write	
 	int exit = 0;
 	//Open db
 	//TESTING PURPOSES DBs
-	if (updateTest){ 
-		exit = sqlite3_open("exampleUpdateTest.db", &db); 
-		dbTest(*db, exit);
+	if (updateTest == 0){ 
+		exit = sqlite3_open(dbNameString0, &db); 
+	}
+	//COUNTER TEST
+	else if (updateTest == 1) {
+		exit = sqlite3_open(dbNameString, &db);
 	}
 	else {
-		exit = sqlite3_open("example.db", &db);
-		//Test Connection
-		dbTest(*db, exit);
+		exit = sqlite3_open(dbNameString2, &db);
 	}
 	
-	//QUERIES AND TABLE SET UP
-	std::string create(tableBaseCreate());
-	std::string query(queryAllFieldsTable("CHARACTER"));
+	//QUERIES AND TABLE SET UP, TEMPORARY UNTIL SYSTEM MORE ROBUST
+	//std::string create(tableBaseCreate());
+	//std::string query("ALTER TABLE CHARACTER ADD COLUMN EXISTS_BOOL INT (0);");
+	std::string query(queryAllFieldsTable("WORLD"));
+	
+	//std::string sqlWorld("INSERT INTO WORLD (ID,CHA_COUNT,LOC_COUNT,SCENE_COUNT,NAME,EXISTS_BOOL) VALUES (1,0,0,0,'Test World',0);");
+	//std::cout << sqlWorld << std::endl;
 	returnThis.clear();
 	identifyThis.clear();
 	//std::string query(removeIDFromTable(5));
 	//std::string query("VACUUM;");
 	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
 	//exit = sqlite3_exec(db, create.c_str(), callback, (void*)data.c_str(), NULL);
+    //exit = sqlite3_exec(db, sqlWorld.c_str(), callback, (void*)data.c_str(), NULL);
+	displayAndError(exit, true);
 	std::cout << "cha count" << chaCount << std::endl << "Id count" << idCount << std::endl;
+	
 	//////////////////////
 	//TEMP UI OFF OR ON//
 	////////////////////
@@ -383,7 +401,6 @@ void displayAndError(int exit, bool display)
 	}
 	if (exit != SQLITE_OK) {
 		std::cerr << "Error Insert" << std::endl;
-		
 	}
 
 }
