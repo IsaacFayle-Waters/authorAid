@@ -39,7 +39,7 @@ std::vector <std::string> returnThis;
 std::vector <std::string> identifyThis;
 //GLOBAL CHARACTER COUNT, CURRENTLY DRAWN FROM CALLBACK FUNCTION, BUT MUST CHANGE TO DB.
 int chaCount = 0;
-int tempChaCountWorld = 131;
+int chaCountWorld = 0;
 
 //Used in a display function. Possibly redundent
 int idCount = 0;
@@ -53,13 +53,14 @@ int testUI = 1;
 //TODO include "exists" into relevent tables and sqlite queries.
 //TODO Set "chaCount" to be provided by World table, instead of callback function. Remove the counter from callback.
 //TODO GUI
+//TODO Investigate Bug in character load when updateing (updateing two rows at once). Possibly already sorted by other
+//changes, but may still be there. Might not be an issue once gui is in place. 
 
 int main(int argc, char** argv) {
-	int woo = countersWorld(dbNameString, 0, "read");
-	std::cout << "woo: " << woo << std::endl;
-	countersWorld(dbNameString, tempChaCountWorld, "write");
-    woo = countersWorld(dbNameString, 0, "read");
-	std::cout << "woo: " << woo << std::endl;
+	//Read Chracter Count from World Table
+	//countersWorld(dbNameString, 0, "write");
+	chaCountWorld = countersWorld(dbNameString, 0, "read");
+	
     //Create db instance
 	sqlite3 *db;
 	//exit deals with sqlite read and write	
@@ -72,6 +73,7 @@ int main(int argc, char** argv) {
 	//COUNTER TEST
 	else if (updateTest == 1) {
 		exit = sqlite3_open(dbNameString, &db);
+		chaCount = countersWorld(dbNameString, 0, "read");
 	}
 	else {
 		exit = sqlite3_open(dbNameString2, &db);
@@ -80,19 +82,17 @@ int main(int argc, char** argv) {
 	//QUERIES AND TABLE SET UP, TEMPORARY UNTIL SYSTEM MORE ROBUST
 	//std::string create(tableBaseCreate());
 	//std::string query("ALTER TABLE CHARACTER ADD COLUMN EXISTS_BOOL INT (0);");
-	std::string query(queryAllFieldsTable("WORLD"));
+	queryAllFieldsTable("WORLD",dbNameString);
+	//exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
 	
-	//std::string sqlWorld("INSERT INTO WORLD (ID,CHA_COUNT,LOC_COUNT,SCENE_COUNT,NAME,EXISTS_BOOL) VALUES (1,0,0,0,'Test World',0);");
-	//std::cout << sqlWorld << std::endl;
 	returnThis.clear();
 	identifyThis.clear();
 	//std::string query(removeIDFromTable(5));
-	//std::string query("VACUUM;");
-	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
+		
 	//exit = sqlite3_exec(db, create.c_str(), callback, (void*)data.c_str(), NULL);
     //exit = sqlite3_exec(db, sqlWorld.c_str(), callback, (void*)data.c_str(), NULL);
 	displayAndError(exit, true);
-	std::cout << "cha count" << chaCount << std::endl << "Id count" << idCount << std::endl;
+	//std::cout << "cha count" << chaCount << std::endl << "Id count" << idCount << std::endl;
 	
 	//////////////////////
 	//TEMP UI OFF OR ON//
@@ -188,14 +188,16 @@ int main(int argc, char** argv) {
 						if (fromLoad == true) {
 							chaCount = tempChaCount;
 						}
+						//If the character is now being inserted for the first time, 
+						//it doesn't yet exist, so increment chaCountWorld
 						if (tempChtr.getExistence() == false) {
-							std::string sql(insertCharacter(tempChtr, chaCount,0));
-							exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
 							tempChtr.setExistence();
+							insertCharacter(tempChtr, chaCountWorld + 1, 0, dbNameString);
+							countersWorld(dbNameString, chaCountWorld + 1, "write");
 						}
+						//If the character exists, then it is simply updated
 						else if (tempChtr.getExistence() == true) {
-							std::string sql(insertCharacter(tempChtr, chaCount, 1));
-							exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+							insertCharacter(tempChtr, chaCountWorld, 1, dbNameString);
 						}
 					}
 					//Load Caracter from db To update feilds

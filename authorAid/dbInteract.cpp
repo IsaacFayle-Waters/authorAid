@@ -64,12 +64,14 @@ std::string tableBaseCreate()
 	return tableString;
 }
 
-std::string queryAllFieldsTable(std::string tableName)
+void queryAllFieldsTable(std::string tableName,char dbNameString[])
 {
-	//Use with the bellow in main
-	//exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL)
-	std::string qry = "SELECT * FROM " + tableName + ";";
-	return qry;
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
+	std::string query = "SELECT * FROM " + tableName + ";";
+	exit = sqlite3_exec(db, query.c_str(), callbackDbPrint, NULL, NULL);
+	sqlite3_close(db);
 }
 std::string dropT(std::string table)
 {	
@@ -121,8 +123,10 @@ std::string insertSpecific(std::string table, std::string column, std::string va
 	}
 }
 //Might find that this is redundant, but helpful for now in populating db.
-std::string insertCharacter(Character character,int index, int Update_1_Insert_0)
+void insertCharacter(Character character,int index, int Update_1_Insert_0, char dbNameString[])
 {  
+	std::string sql;
+
 	std::string newdex = std::to_string(index);
 	std::string name = character.getName();
 	int ageTemp = character.getCharacterAge();
@@ -131,22 +135,35 @@ std::string insertCharacter(Character character,int index, int Update_1_Insert_0
 	std::string motive = character.getMotive();
 	std::string gender = character.getGender();
 	std::string notes = character.getNotes();
+	bool exists = character.getExistence();
+	std::string bool_exists = "0";
+	if (exists == true) {
+		bool_exists = "1";
+	}
+
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
+
 	if (Update_1_Insert_0 == 0) {
-		std::string sql("INSERT INTO CHARACTER VALUES(" + newdex + ",'" + name + "'," + age + ",'" + description + "',"
-			"'" + motive + "','" + gender + "', '" + notes + "');");
-		return sql;
+		sql = ("INSERT INTO CHARACTER VALUES(" + newdex + ",'" + name + "'," + age + ",'" + description + "',"
+			"'" + motive + "','" + gender + "', '" + notes + "', " + bool_exists + ");");
+		//return sql;
 	}
 	else if (Update_1_Insert_0 == 1) {
-		std::string sql("UPDATE CHARACTER SET NAME = '" + name + "', AGE = " + age + ", DESCRIPTION = '" + description + "', "    
+		sql = ("UPDATE CHARACTER SET NAME = '" + name + "', AGE = " + age + ", DESCRIPTION = '" + description + "', "    
 						"MOTIVE = '" + motive + "', GENDER = '" + gender + "', NOTES = '" + notes + "' WHERE ID = " + newdex + ";");
-		return sql;
+		//return sql;
 	}
 	else {
 		std::cout << std::endl << "ERROR SELECTION" << std::endl;
-		return "";
+		//return "";
 	}
+	exit = sqlite3_exec(db, sql.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
+	errorInsert(exit);
+	sqlite3_close(db);
 }
-
+//Read and write counters from db
 int countersWorld(char dbNameString[],int chaCount, std::string readOrWrite)
 {
 	sqlite3* db;
@@ -193,6 +210,18 @@ int callbackDbInter(void* data, int argc, char** argv, char** azColName) {
 		if (argv[i]) {
 			returnCount.push_back(argv[i]);	
 		}
+		
 	}
+	return 0;
+}
+
+int callbackDbPrint(void* data, int argc, char** argv, char** azColName) {
+	int i;
+	//Recieve data
+	for (i = 0; i < argc; i++) {
+		printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+		//Return to global
+	}
+	printf("\n");
 	return 0;
 }

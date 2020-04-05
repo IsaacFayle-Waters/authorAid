@@ -3,7 +3,6 @@
 class Location :
 	public World
 {
-
 public:
 	Location();
 };
