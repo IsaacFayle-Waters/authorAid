@@ -71,6 +71,7 @@ void queryAllFieldsTable(std::string tableName,char dbNameString[])
 	exit = sqlite3_open(dbNameString, &db);
 	std::string query = "SELECT * FROM " + tableName + ";";
 	exit = sqlite3_exec(db, query.c_str(), callbackDbPrint, NULL, NULL);
+	errorInsert(exit);
 	sqlite3_close(db);
 }
 std::string dropT(std::string table)
@@ -79,12 +80,16 @@ std::string dropT(std::string table)
 	return sql;
 }
 //remove in relation to id
-std::string removeIDFromTable(std::string table,int id)
+void removeIDFromTable(std::string table,int id,char dbNameString[])
 {
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
 	std::string sID = std::to_string(id);
 	std::string sql = "DELETE FROM "+ table +" WHERE ID = "+sID+";";
-
-	return sql;
+	exit = sqlite3_exec(db, sql.c_str(), callbackDbInter, NULL, NULL);
+	errorInsert(exit);
+	sqlite3_close(db);
 }
 //Select field(s) from specific table
 void selectFrom(std::string selection, std::string fromTable,int limit, int offset,char dbNameString[],bool printOnly)

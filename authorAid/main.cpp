@@ -38,6 +38,7 @@ char dbNameString2[] = "example.db";
 //Return strings from db (identifyThis possibly redundant)
 std::vector <std::string> returnThis;
 std::vector <std::string> identifyThis;
+std::vector <int> deletedIDs;
 
 //GLOBAL CHARACTER COUNT, CURRENTLY DRAWN FROM CALLBACK FUNCTION, BUT MUST CHANGE TO DB.
 int chaCount = 0;
@@ -53,13 +54,12 @@ int updateTest = 1;
 int testUI = 1;
 
 //TODO include "exists" into relevent tables and sqlite queries.
-//TODO Set "chaCount" to be provided by World table, instead of callback function. Remove the counter from callback.
-//TODO GUI
-//TODO Investigate Bug in character load when updateing (updateing two rows at once). Possibly already sorted by other
-//changes, but may still be there. Might not be an issue once gui is in place. 
+///TODO GUI
+//TODO take steps to prevent sql injection
 
 int main(int argc, char** argv) {
 	//Read Chracter Count from World Table
+	//countersWorld(dbNameString, 15, "write");
 	chaCountWorld = countersWorld(dbNameString, 0, "read");
 	
     //Create db instance
@@ -230,23 +230,23 @@ int main(int argc, char** argv) {
 					}
 					//Delete
 					else if (inputINS == "del") {
-						//std::string sql(selectFrom("ID,NAME", "CHARACTER", chaCount, 0,dbNameString,true));
-						//exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
 						selectFrom("ID,NAME", "CHARACTER", chaCount, 0, dbNameString, true);
-						chaCount = hold;
-						
+						std::cout << "Choose by id. -1 to cancel delete process: " << std::endl;
 						int delChoice = inputInt();
 						std::cout << delChoice;
-						std::string remove(removeIDFromTable("CHARACTER", delChoice));
-						exit = sqlite3_exec(db, remove.c_str(), callback, NULL, NULL);
-						
-
-						/*std::string sql2(selectFrom("ID,NAME", "CHARACTER", chaCount, 0));
-						exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
-						chaCount = hold;*/
+						removeIDFromTable("CHARACTER", delChoice,dbNameString);
+						//Prevent counter from getting out of sync
+						if (delChoice == chaCountWorld) {
+							chaCountWorld -= 1;
+							countersWorld(dbNameString, chaCountWorld, "write");
+						}
+						//Keep list of deleted ids and re-insert new characters?. Could also write an empty
+						//character in to avoid null problems.
+						else {
+							deletedIDs.push_back(delChoice);
+						}
 					}
 					//Error message for insert
-					displayAndError(exit, false);
 					chaCount = hold;
 				}
 				chaCount = hold;

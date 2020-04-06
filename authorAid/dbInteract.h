@@ -8,8 +8,8 @@ std::string tableBaseCreate();
 void queryAllFieldsTable(std::string tableName, char dbNameString[]);
 //Delete table
 std::string dropT(std::string table);
-//Remove table
-std::string removeIDFromTable(std::string table, int id);
+//Remove row from table
+void removeIDFromTable(std::string table, int id, char dbNameString[]);
 //select something from table
 void selectFrom(std::string selection, std::string fromTable, int limit, int offset, char dbNameString[], bool printOnly);
 //Update values
