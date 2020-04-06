@@ -2,6 +2,9 @@
 #include "Scene.h"
 
 Scene::Scene() = default;
+Scene::~Scene()
+{
+};
 Scene::Scene(std::string location, std::string timeAndOrDate,
 	std::string sceneName, std::string genralDescription,
 	int sceneNumber)

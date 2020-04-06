@@ -23,6 +23,7 @@ private:
 
 public:
 	Scene();
+	~Scene();
 	Scene(std::string location, std::string timeAndOrDate, std::string sceneName,
 		std::string genralDescription, int sceneNumber);
 	void setLocation(std::string location);

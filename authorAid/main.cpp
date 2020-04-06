@@ -22,11 +22,11 @@ void printSceneInfo(Scene scene, bool charInfoOn);
 void printCharacterInfo(Character character);
 void printChapterInfo(Chapter chapter);
 void printNarativeGeneralInfo(NarativeGeneralInfo ngi);
-int callback(void* data, int argc, char** argv, char** azColName);
-void displayAndError(int exit, bool display);
-//DB TEST DOES NOT WORK!!!//////////////////
-int dbTest(struct sqlite3 &db, int exit);//
-//////////////////////////////////////////
+//OBSOLETE AFTER TEST/BUILD!!!/////////////////////////////////////// 
+int callback(void* data, int argc, char** argv, char** azColName);//
+void displayAndError(int exit, bool display);//////////////////////
+//////////////////////////////////////////////
+
 int inputInt();
 std::string inputChtrChoice(std::string message);
 //Strings
@@ -105,9 +105,8 @@ int main(int argc, char** argv) {
 		while (ui) {
 			//MAIN INPUT//
 			std::string input;
-			std::cout << "Enter a command: view chtr, insert chtr, exit. " <<std::endl;
+			std::cout << "Enter an option: (view chtr), (insert chtr), (scene), (exit). " <<std::endl;
 			std::getline(std::cin, input);
-			std::cout << input << std::endl;
 			//Exit condition//
 			if (input == "exit") {
 				ui = 0;
@@ -121,9 +120,6 @@ int main(int argc, char** argv) {
 			}
 			//Insert a charcter, having assigned some or all details (I don't like switch statements)
 			else if (input == "insert chtr") {
-				//Global character count
-				chaCount += 1;
-				int hold = chaCount;
 				//exit condition
 				int exitInsert = 1;
 				//Character class temp
@@ -131,7 +127,7 @@ int main(int argc, char** argv) {
 				bool fromLoad = false;
 				int tempChaCount = 0;
 				//////////////////////////
-				//Main insert chtr loop//
+				//Main chtr loop//
 				////////////////////////
 				while (exitInsert) {
 					std::cout << "Character insert: please choose an attribute to insert." << std::endl <<
@@ -140,8 +136,7 @@ int main(int argc, char** argv) {
 					//input string
 					std::string inputINS;
 					std::getline(std::cin, inputINS);
-					//check position in db
-					std::cout << chaCount << std::endl;
+					
 					//Exit Condition
 					if (inputINS == "exit") {
 						exitInsert = 0;
@@ -203,7 +198,6 @@ int main(int argc, char** argv) {
 					else if (inputINS == "load") {
 						///Display all Characters
 						selectFrom("ID,NAME", "CHARACTER", chaCountWorld, 0, dbNameString, true);
-						chaCount = hold;
 						//Select Character by ID number
 						std::cout << "Select Character ID from list, or -1 to cancel: ";
 						//Get input, and set temp for purposes of updating
@@ -246,10 +240,50 @@ int main(int argc, char** argv) {
 							deletedIDs.push_back(delChoice);
 						}
 					}
-					//Error message for insert
-					chaCount = hold;
+				}	
+			}
+			else if (input == "scene") {
+				//exit condition
+				int exitScene = 1;
+				Scene tempScene;
+				while (exitScene) {
+					std::string inputSCE;
+					std::getline(std::cin, inputSCE);
+
+					//Exit Condition
+					if (inputSCE == "exit") {
+						exitScene = 0;
+						tempScene.~Scene();
+						break;
+					}
+					//temp, will become linked with location class
+					else if (inputSCE == "l") {
+						tempScene.setLocation(inputChtrChoice("What is the location?"));
+					}
+					//Time
+					else if (inputSCE == "t") {
+						tempScene.setTimeAndOrDate(inputChtrChoice("What is the time and/or date?"));
+					}
+					//Scene name
+					else if (inputSCE == "n") {
+						tempScene.setName(inputChtrChoice("What name do you want to insert? "));
+					}
+					//Scene description
+					else if (inputSCE == "d") {
+						tempScene.setDescription(inputChtrChoice("Describe the location: "));
+					}
+					//Scene notes
+					else if (inputSCE == "notes") {
+						tempScene.setNotes(inputChtrChoice("Would you like to make some notes on the scene?"));
+					}
+					else if (inputSCE == "chtrs") {
+						std::cout << "Characters here" << std::endl;
+					}
+					else if (inputSCE == "v") {
+						printSceneInfo(tempScene,false);
+					}
+
 				}
-				chaCount = hold;
 			}
 		}
 	}
@@ -407,17 +441,7 @@ void displayAndError(int exit, bool display)
 	}
 
 }
-//DOESN'T WORK!!!! WOW!!!!!!
-int dbTest(struct sqlite3 &db, int exit)
-{
-	if (exit) {
-		std::cerr << "Error open db" << sqlite3_errmsg(&db) << std::endl;
-		return(-1);
-	}
-	else {
-		std::cout << "Opened Database Successfully!" << std::endl;
-	}
-}
+
 //Safley input integer, and parse.
 int inputInt()
 {
