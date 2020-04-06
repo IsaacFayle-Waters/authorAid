@@ -2,12 +2,13 @@
 #include <string>
 #include <vector>
 #include "Character.h"
+#include "Scene.h"
 //Create base tables. At the moment, only creates character table. 
-std::string tableBaseCreate();
+void tableBaseCreate(char dbNameString[]);
 //Display all in Table.
 void queryAllFieldsTable(std::string tableName, char dbNameString[]);
 //Delete table
-std::string dropT(std::string table);
+void dropT(std::string table, char dbNameString[]);
 //Remove row from table
 void removeIDFromTable(std::string table, int id, char dbNameString[]);
 //select something from table
@@ -18,8 +19,12 @@ std::string updateDb(std::string table, std::string column, std::string value, i
 std::string insertSpecific(std::string table, std::string column, std::string value, int id, bool idOnOff);
 //Character loader/Updater
 void insertCharacter(Character character, int index, int Update_1_Insert_0, char dbNameString[]);
-//Read and write chaCounter to World
+//Scene loader/Updater
+void insertScene(Scene scene, int index, int Update_1_Insert_0, char dbNameString[], std::string chtrList);
+//Read and write character counter to World
 int countersWorld(char dbNameString[], int chaCount, std::string readOrWrite);
+//Read and write scene counter to World
+int sceneCountersWorld(char dbNameString[], int sceneCount, std::string readOrWrite);
 //db insert error
 void errorInsert(int exit);
 //Callback functions. Second one displays the info, and is probably just for testing.

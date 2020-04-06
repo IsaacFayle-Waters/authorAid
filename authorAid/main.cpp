@@ -41,8 +41,9 @@ std::vector <std::string> identifyThis;
 std::vector <int> deletedIDs;
 
 //GLOBAL CHARACTER COUNT, CURRENTLY DRAWN FROM CALLBACK FUNCTION, BUT MUST CHANGE TO DB.
-int chaCount = 0;
+int chaCount = 0;//OBSOLETE
 int chaCountWorld = 0;
+int sceneCountWorld = 0;
 
 //Used in a display function. Possibly redundent
 int idCount = 0;
@@ -53,23 +54,40 @@ int visTest = 0;
 int updateTest = 1;
 int testUI = 1;
 
-//TODO include "exists" into relevent tables and sqlite queries.
-///TODO GUI
+//TODO GUI
+
+//TODO Pass some menu options/sections of code as functions instead. Getting a little messy as is.
+//Same for some of the dbInteract sections. Code could tip towards being difficult to maintain.
+///Too much repeated code///. Example: counter functions could be merged.
+
 //TODO take steps to prevent sql injection
 
+//TODO Investigate memory leak possiblities
+
+//TODO DEBUG insert chtr. Load and upload possible problems
+
 int main(int argc, char** argv) {
-	//Read Chracter Count from World Table
+	//Read Counters from World Table
 	//countersWorld(dbNameString, 15, "write");
+	//sceneCountersWorld(dbNameString, 0, "write");
 	chaCountWorld = countersWorld(dbNameString, 0, "read");
+	sceneCountWorld = sceneCountersWorld(dbNameString, 0, "read");
 	
+
     //Create db instance
 	sqlite3 *db;
 	//exit deals with sqlite read and write	
 	int exit = 0;
 	
+	/*std::string testCL = "3,4,8";
+	Scene test;
+	insertScene(test, 1, 0, dbNameString, testCL);
+	insertScene(test, 1, 1, dbNameString, testCL);*/
+
 	//Open db
 	//TESTING PURPOSES DBs
 	if (updateTest == 0){ 
+		//WILL NO LONGER WORK - REMOVE
 		exit = sqlite3_open(dbNameString0, &db); 
 	}
 	//COUNTER TEST
@@ -78,16 +96,18 @@ int main(int argc, char** argv) {
 		chaCount = countersWorld(dbNameString, 0, "read");
 	}
 	else {
+		//WILL NO LONGER WORK - REMOVE
 		exit = sqlite3_open(dbNameString2, &db);
 	}
 	
 	//QUERIES AND TABLE SET UP, TEMPORARY UNTIL SYSTEM MORE ROBUST
-	//std::string create(tableBaseCreate());
-	//std::string query("ALTER TABLE CHARACTER ADD COLUMN EXISTS_BOOL INT (0);");
+	//tableBaseCreate(dbNameString);
+	//std::string query("ALTER TABLE SCENE ADD COLUMN EXISTS_BOOL INT (0);");
 	//exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
 	//std::string query(removeIDFromTable(5));
 	//exit = sqlite3_exec(db, create.c_str(), callback, (void*)data.c_str(), NULL);
 	//Visual tests
+	
 	queryAllFieldsTable("WORLD",dbNameString);
 	queryAllFieldsTable("CHARACTER", dbNameString);
 	returnThis.clear();
@@ -126,9 +146,9 @@ int main(int argc, char** argv) {
 				Character tempChtr;
 				bool fromLoad = false;
 				int tempChaCount = 0;
-				//////////////////////////
+				///////////////////
 				//Main chtr loop//
-				////////////////////////
+				/////////////////
 				while (exitInsert) {
 					std::cout << "Character insert: please choose an attribute to insert." << std::endl <<
 						"(n)ame, (a)ge, (d)escription, (m)otive,(g)ender,(notes)." << std::endl <<
@@ -242,11 +262,20 @@ int main(int argc, char** argv) {
 					}
 				}	
 			}
+			 ///////////////
+			 //Scene Loop//
+		     /////////////
 			else if (input == "scene") {
 				//exit condition
 				int exitScene = 1;
 				Scene tempScene;
+				int tempSceneCount = 0;
+				bool fromLoad = false;
+				std::string chtrList = " ";
+				int numCharacters = 0;
 				while (exitScene) {
+					std::cout << "Choose an option: (l)ocation, (t)ime, (n)ame,(d)escription,(notes)"
+						"(add chtr),(v)iew, (save), (exit). " << std::endl;
 					std::string inputSCE;
 					std::getline(std::cin, inputSCE);
 
@@ -276,11 +305,58 @@ int main(int argc, char** argv) {
 					else if (inputSCE == "notes") {
 						tempScene.setNotes(inputChtrChoice("Would you like to make some notes on the scene?"));
 					}
-					else if (inputSCE == "chtrs") {
-						std::cout << "Characters here" << std::endl;
+					else if (inputSCE == "add chtr") {
+						Character tempChtr;
+						std::cout << "Select Character ID from list, or -1 to cancel: ";
+						selectFrom("ID,NAME", "CHARACTER", chaCountWorld, 0, dbNameString, true);
+						//Select Character by ID number
+						int idLoadChoice =  inputInt() - 1;
+						if (idLoadChoice < 0 || idLoadChoice > chaCountWorld) {
+							std::cout << "Load Cancelled" << std::endl;
+							break;
+						}
+						extern std::vector <std::string> returnCount;
+						//Select Return
+						selectFrom("ID,NAME,AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER", 1, idLoadChoice, dbNameString, false);
+						//Destructor
+						tempChtr.~Character();
+						//Return from selectFrom, adds details to tempchar.
+						tempChtr.setCharacterFromDb(returnCount);
+						//Clear return
+						returnCount.clear();
+						tempScene.setCharacters(tempChtr);
+												
+						std::string idToAdd = std::to_string(idLoadChoice + 1) + "N";
+						chtrList += idToAdd;
+						std::cout << chtrList << std::endl;
+						numCharacters += 1;
 					}
 					else if (inputSCE == "v") {
-						printSceneInfo(tempScene,false);
+						printSceneInfo(tempScene,true);
+					}
+					else if (inputSCE == "save") {
+						//Check to see if Character details were loaded, if so, deal with ID position from load
+						if (fromLoad == true) {
+							sceneCountWorld = tempSceneCount;
+						}
+						//Check existence of scene
+						if (tempScene.getExistence() == false) {
+							tempScene.setExistence();
+							sceneCountWorld += 1;
+							insertScene(tempScene, sceneCountWorld, 0, dbNameString, chtrList);
+							sceneCountersWorld(dbNameString, sceneCountWorld, "write");
+						}
+						//If the character exists, then it is simply updated. Reset chaCountWorld after.
+						else if (tempScene.getExistence() == true) {
+							insertScene(tempScene, sceneCountWorld, 1, dbNameString, chtrList);
+							sceneCountWorld = sceneCountersWorld(dbNameString, 0, "read");
+							break;
+						}
+
+						//INCREMENT SCENE NUMBER
+					}
+					else if (inputSCE == "load") {
+
 					}
 
 				}

@@ -8,9 +8,9 @@
 std::vector <std::string> returnCount;
 std::string data2("");
 
-std::string tableBaseCreate()
+void tableBaseCreate(char dbNameString[])
 {  //INTEGER PRIMARY KEY MAY AUTOMATE THE INDEXING
-	std::string tableString = 
+	std::string sql = 
 		"CREATE TABLE IF NOT EXISTS CHARACTER("
 		"ID INT PRIMARY KEY     NOT NULL, "
 		"NAME           TEXT        NULL, "
@@ -28,9 +28,10 @@ std::string tableBaseCreate()
 		"SCENE_NAME		TEXT		NULL,  "
 		"GEN_DSCRPT     TEXT		NULL,  "
 		"NOTES			TEXT		NULL,  "			
-		"SCENE_NUM		INT			NULL,  "
-		"CHARACTERS     BLOB		NULL,  "
-		"NUM_CRCTRS		INT			NULL );"
+		"SCENE_NUM		INT		NOT	NULL,  "
+		"CHARACTERS     TEXT		NULL,  "
+		"NUM_CRCTRS		INT		NOT	NULL,  "
+		"EXISTS_BOOL    INT     NOT NULL); "
 		
 		"CREATE TABLE IF NOT EXISTS CHAPTER("
 		"ID INT PRIMARY KEY      NOT NULL, "
@@ -38,7 +39,8 @@ std::string tableBaseCreate()
 		"CHPTR_NAME		TEXT		 NULL, "
 		"SCENES			BLOB		 NULL, "
 		"NUM_SCENES		INT		 NOT NULL, "
-		"NOTES          TEXT         NULL);"
+		"NOTES          TEXT         NULL, "
+		"EXISTS_BOOL    INT      NOT NULL);"
 		
 		"CREATE TABLE IF NOT EXISTS NGI("
 		"ID INT PRIMARY KEY		 NOT NULL, "
@@ -61,7 +63,13 @@ std::string tableBaseCreate()
 		"EXISTS_BOOL    INT      NOT NULL);"
 		;
 
-	return tableString;
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
+
+	exit = sqlite3_exec(db, sql.c_str(), callbackDbInter, NULL, NULL);
+	errorInsert(exit);
+	sqlite3_close(db);
 }
 
 void queryAllFieldsTable(std::string tableName,char dbNameString[])
@@ -74,10 +82,15 @@ void queryAllFieldsTable(std::string tableName,char dbNameString[])
 	errorInsert(exit);
 	sqlite3_close(db);
 }
-std::string dropT(std::string table)
-{	
+void dropT(std::string table, char dbNameString[])
+{
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
 	std::string sql = "DROP TABLE ["+ table +"];";
-	return sql;
+	exit = sqlite3_exec(db, sql.c_str(), callbackDbInter, NULL, NULL);
+	errorInsert(exit);
+	sqlite3_close(db);
 }
 //remove in relation to id
 void removeIDFromTable(std::string table,int id,char dbNameString[])
@@ -170,16 +183,57 @@ void insertCharacter(Character character,int index, int Update_1_Insert_0, char 
 	if (Update_1_Insert_0 == 0) {
 		sql = ("INSERT INTO CHARACTER VALUES(" + newdex + ",'" + name + "'," + age + ",'" + description + "',"
 			"'" + motive + "','" + gender + "', '" + notes + "', " + bool_exists + ");");
-		//return sql;
 	}
 	else if (Update_1_Insert_0 == 1) {
 		sql = ("UPDATE CHARACTER SET NAME = '" + name + "', AGE = " + age + ", DESCRIPTION = '" + description + "', "    
 						"MOTIVE = '" + motive + "', GENDER = '" + gender + "', NOTES = '" + notes + "' WHERE ID = " + newdex + ";");
-		//return sql;
 	}
 	else {
-		std::cout << std::endl << "ERROR SELECTION" << std::endl;
-		//return "";
+		std::cout << std::endl << "ERROR character SELECTION" << std::endl;
+	}
+	exit = sqlite3_exec(db, sql.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
+	errorInsert(exit);
+	sqlite3_close(db);
+}
+
+void insertScene(Scene scene, int index, int Update_1_Insert_0, char dbNameString[], std::string chtrList)
+{
+	std::string sql;
+
+	std::string newdex = std::to_string(index);
+	std::string name = scene.getName();
+	std::string location = scene.getLocation();
+	int numChtrsInt = scene.getNumberOfCharacters();
+	std::string  numChtrs = std::to_string(numChtrsInt);
+	int sceneNumInt = scene.getSceneNumber();
+	std::string sceneNum = std::to_string(sceneNumInt);
+	std::string description = scene.getDescription();
+	std::string timeDate = scene.getTimeAndOrDate();
+	std::string characters = chtrList;
+	std::string notes = scene.getNotes();
+	bool exists = scene.getExistence();
+
+	std::string bool_exists = "0";
+	if (exists == true) {
+		bool_exists = "1";
+	}
+	
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
+
+	if (Update_1_Insert_0 == 0) {
+		sql = ("INSERT INTO SCENE (ID, SCENE_NAME,LOCATION,TIME_DATE,GEN_DSCRPT, SCENE_NUM, CHARACTERS, NUM_CRCTRS, NOTES, EXISTS_BOOL) VALUES(" + newdex + ",'" + name + "','" +location + "','" + timeDate + "','"  + description + "',"
+			 + newdex + ",'" + characters + "',"+numChtrs+", '" + notes + "', " + bool_exists + ");");
+		//std::cout << sql << std::endl;
+	}
+	else if (Update_1_Insert_0 == 1) {
+		sql = ("UPDATE CHARACTER SET NAME = '" + name + "', LOCACTION = '" + location + "',TIME_DATE = '"+timeDate+"' GEN_DSCRPT = '" + description + "', "
+			"SCENE_NUM = " + sceneNum + ", CHARACTERS = '" + characters + "', NUM_CRCTRS = " +numChtrs+ ", NOTES = '" + notes + "' WHERE ID = " + newdex + ";");
+		//std::cout << sql << std::endl;
+	}
+	else {
+		std::cout << std::endl << "ERROR Scene SELECTION" << std::endl;
 	}
 	exit = sqlite3_exec(db, sql.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
 	errorInsert(exit);
@@ -210,6 +264,39 @@ int countersWorld(char dbNameString[],int chaCount, std::string readOrWrite)
 		
 		std::string sqlWrite("UPDATE WORLD SET CHA_COUNT = " + chaCounter + ";");
 		exit = sqlite3_exec(db, sqlWrite.c_str(),0, 0, NULL);
+		errorInsert(exit);
+	}
+	else {
+		std::cerr << "Counter error" << std::endl;
+	}
+	sqlite3_close(db);
+}
+//Scene counter (COULD BE MERGED WITH COUNTERS WORLD)
+int sceneCountersWorld(char dbNameString[], int sceneCount, std::string readOrWrite)
+{
+
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
+	std::string sceneCounter = std::to_string(sceneCount);
+
+	if (readOrWrite == "read") {
+		int ret = 0;
+		returnCount.clear();
+		std::string sqlRead("SELECT SCENE_COUNT FROM WORLD;");
+		exit = sqlite3_exec(db, sqlRead.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
+		std::string retCount = returnCount.at(0);
+
+		std::stringstream myStream(retCount);
+		myStream >> ret;
+		returnCount.clear();
+		errorInsert(exit);
+		return ret;
+	}
+	else if (readOrWrite == "write") {
+
+		std::string sqlWrite("UPDATE WORLD SET SCENE_COUNT = " + sceneCounter + ";");
+		exit = sqlite3_exec(db, sqlWrite.c_str(), 0, 0, NULL);
 		errorInsert(exit);
 	}
 	else {
