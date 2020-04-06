@@ -9,6 +9,7 @@
 #include <sstream>
 #include <vector>
 #include <sqlite3.h>
+#include <boost/algorithm/string/replace.hpp>
 
 #include "Scene.h"
 #include "Character.h"
@@ -37,6 +38,7 @@ char dbNameString2[] = "example.db";
 //Return strings from db (identifyThis possibly redundant)
 std::vector <std::string> returnThis;
 std::vector <std::string> identifyThis;
+
 //GLOBAL CHARACTER COUNT, CURRENTLY DRAWN FROM CALLBACK FUNCTION, BUT MUST CHANGE TO DB.
 int chaCount = 0;
 int chaCountWorld = 0;
@@ -58,13 +60,13 @@ int testUI = 1;
 
 int main(int argc, char** argv) {
 	//Read Chracter Count from World Table
-	//countersWorld(dbNameString, 0, "write");
 	chaCountWorld = countersWorld(dbNameString, 0, "read");
 	
     //Create db instance
 	sqlite3 *db;
 	//exit deals with sqlite read and write	
 	int exit = 0;
+	
 	//Open db
 	//TESTING PURPOSES DBs
 	if (updateTest == 0){ 
@@ -82,18 +84,16 @@ int main(int argc, char** argv) {
 	//QUERIES AND TABLE SET UP, TEMPORARY UNTIL SYSTEM MORE ROBUST
 	//std::string create(tableBaseCreate());
 	//std::string query("ALTER TABLE CHARACTER ADD COLUMN EXISTS_BOOL INT (0);");
-	queryAllFieldsTable("WORLD",dbNameString);
 	//exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
-	
+	//std::string query(removeIDFromTable(5));
+	//exit = sqlite3_exec(db, create.c_str(), callback, (void*)data.c_str(), NULL);
+	//Visual tests
+	queryAllFieldsTable("WORLD",dbNameString);
+	queryAllFieldsTable("CHARACTER", dbNameString);
 	returnThis.clear();
 	identifyThis.clear();
-	//std::string query(removeIDFromTable(5));
-		
-	//exit = sqlite3_exec(db, create.c_str(), callback, (void*)data.c_str(), NULL);
-    //exit = sqlite3_exec(db, sqlWorld.c_str(), callback, (void*)data.c_str(), NULL);
 	displayAndError(exit, true);
-	//std::cout << "cha count" << chaCount << std::endl << "Id count" << idCount << std::endl;
-	
+		
 	//////////////////////
 	//TEMP UI OFF OR ON//
 	////////////////////
@@ -117,13 +117,7 @@ int main(int argc, char** argv) {
 				int idIs;
 				std::cout << "Character id is? ";
 				idIs = inputInt() - 1;
-				std::string sql(selectFrom("NAME, AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER", 1, idIs));
-				exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
-				chaCount -= 1;
-
-				displayAndError(exit, false);
-				returnThis.clear();
-				identifyThis.clear();
+				selectFrom("NAME, AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER", 1, idIs, dbNameString, true);
 			}
 			//Insert a charcter, having assigned some or all details (I don't like switch statements)
 			else if (input == "insert chtr") {
@@ -178,6 +172,7 @@ int main(int argc, char** argv) {
 					//Enter Notes
 					else if (inputINS == "notes") {
 						tempChtr.setNotes(inputChtrChoice("Do you have any notes to make about this character? "));
+						//tempChtr.setNotes(veryLongText);
 					}
 					//View Character
 					else if (inputINS == "v") {
@@ -185,54 +180,59 @@ int main(int argc, char** argv) {
 					}
 					//Save Character's details to table or Update Charcter's details.
 					else if (inputINS == "save") {
+						//Check to see if Character details were loaded, if so, deal with ID position from load
 						if (fromLoad == true) {
-							chaCount = tempChaCount;
+							chaCountWorld = tempChaCount;
 						}
 						//If the character is now being inserted for the first time, 
 						//it doesn't yet exist, so increment chaCountWorld
 						if (tempChtr.getExistence() == false) {
 							tempChtr.setExistence();
-							insertCharacter(tempChtr, chaCountWorld + 1, 0, dbNameString);
-							countersWorld(dbNameString, chaCountWorld + 1, "write");
+							chaCountWorld += 1;
+							insertCharacter(tempChtr, chaCountWorld, 0, dbNameString);
+							countersWorld(dbNameString, chaCountWorld, "write");
 						}
-						//If the character exists, then it is simply updated
+						//If the character exists, then it is simply updated. Reset chaCountWorld after.
 						else if (tempChtr.getExistence() == true) {
 							insertCharacter(tempChtr, chaCountWorld, 1, dbNameString);
+							chaCountWorld = countersWorld(dbNameString, 0, "read");
+							break;
 						}
 					}
 					//Load Caracter from db To update feilds
 					else if (inputINS == "load") {
 						///Display all Characters
-						std::string sql(selectFrom("ID,NAME", "CHARACTER", chaCount, 0));
-						exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+						selectFrom("ID,NAME", "CHARACTER", chaCountWorld, 0, dbNameString, true);
 						chaCount = hold;
 						//Select Character by ID number
 						std::cout << "Select Character ID from list, or -1 to cancel: ";
-						int idLoadChoice = tempChaCount  = inputInt() - 1;
-						if (idLoadChoice < 0 || idLoadChoice > chaCount) {
+						//Get input, and set temp for purposes of updating
+						int idLoadChoice = tempChaCount  = inputInt();
+						if (idLoadChoice < 0 || idLoadChoice > chaCountWorld) {
 							std::cout << "Load Cancelled" << std::endl;
-							
 							break;
 						}
-						returnThis.clear();
-						sql = (selectFrom("ID,NAME,AGE, DESCRIPTION, MOTIVE, GENDER, NOTES","CHARACTER", 1, idLoadChoice));
-						
-						exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
-						//Add details to temp instance
+						//External from dbInteract.cpp. Returns from callback used in selectFrom if printOnly = false
+						extern std::vector <std::string> returnCount;
+						//Select Return
+						selectFrom("ID,NAME,AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER", 1, idLoadChoice, dbNameString, false);
+						//Destructor
 						tempChtr.~Character();
-						tempChtr.setCharacterFromDb(returnThis);
-						//Display loaded character
+						//Return from selectFrom, adds details to tempchar.
+						tempChtr.setCharacterFromDb(returnCount);
+						//Clear return
+						returnCount.clear();
+						//Display loaded character, and check/set existence (Should already exist)
 						printCharacterInfo(tempChtr);
-						//clear return
-						returnThis.clear();
-						//????????????????????//
 						tempChtr.setExistence();
-						//Confirm that Character is prodeuct of "load"
+						//Confirm that Character is product of "load"
 						fromLoad = true;
 					}
+					//Delete
 					else if (inputINS == "del") {
-						std::string sql(selectFrom("ID,NAME", "CHARACTER", chaCount, 0));
-						exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+						//std::string sql(selectFrom("ID,NAME", "CHARACTER", chaCount, 0,dbNameString,true));
+						//exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+						selectFrom("ID,NAME", "CHARACTER", chaCount, 0, dbNameString, true);
 						chaCount = hold;
 						
 						int delChoice = inputInt();
@@ -241,9 +241,9 @@ int main(int argc, char** argv) {
 						exit = sqlite3_exec(db, remove.c_str(), callback, NULL, NULL);
 						
 
-						std::string sql2(selectFrom("ID,NAME", "CHARACTER", chaCount, 0));
+						/*std::string sql2(selectFrom("ID,NAME", "CHARACTER", chaCount, 0));
 						exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
-						chaCount = hold;
+						chaCount = hold;*/
 					}
 					//Error message for insert
 					displayAndError(exit, false);
@@ -260,8 +260,9 @@ int main(int argc, char** argv) {
 		Character c2;
 		Character c3; //("Dr.Bamboo", 77, "A nice old doctor, retired now. Enjoys tending to his garden.",
 			//"Execution of ingrates", "Man");
-		std::string sql(selectFrom("NAME, AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER", 1, 2));
-		exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+		//std::string sql(selectFrom("NAME, AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER", 1, 2));
+		//exit = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+		selectFrom("NAME, AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER", 1, 2, dbNameString, true);
 		//c3.setCharacterFromDb(returnThis);
 		//displayAndError(exit);
 		Character Tom("Tom", 44, "Beer beast", "Create new beery world order", "bloke");
@@ -440,6 +441,7 @@ std::string inputChtrChoice(std::string message)
 	std::string choice;
 	std::cout << message;
 	std::getline(std::cin, choice);
+	boost::replace_all(choice, "'", "`");
 	return choice; 
 }
 //Print scenes

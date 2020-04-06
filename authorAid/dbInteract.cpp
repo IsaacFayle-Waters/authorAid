@@ -87,14 +87,30 @@ std::string removeIDFromTable(std::string table,int id)
 	return sql;
 }
 //Select field(s) from specific table
-std::string selectFrom(std::string selection, std::string fromTable,int limit, int offset)
-{	//consider using 'WHERE ID =ID' instead?
+void selectFrom(std::string selection, std::string fromTable,int limit, int offset,char dbNameString[],bool printOnly)
+{
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
+
+	//consider using 'WHERE ID =ID' instead?
 	std::string lim = std::to_string(limit);
 	std::string offs = std::to_string(offset);
-
 	std::string sql = "SELECT " + selection + " FROM " + fromTable +" LIMIT "+ lim +" OFFSET "+ offs +";";
 
-	return sql;
+	if (printOnly == true) {
+		exit = sqlite3_exec(db, sql.c_str(), callbackDbPrint, NULL, NULL);
+	}
+	else if (printOnly == false) {
+		returnCount.clear();
+		exit = sqlite3_exec(db, sql.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
+	}
+	else {
+		std::cerr << "ERROR SELECT!" << std::endl;
+	}
+	errorInsert(exit);
+	sqlite3_close(db);
+	//return sql;
 }
 std::string updateDb(std::string table, std::string column, std::string value, int id)
 {	 
@@ -136,6 +152,7 @@ void insertCharacter(Character character,int index, int Update_1_Insert_0, char 
 	std::string gender = character.getGender();
 	std::string notes = character.getNotes();
 	bool exists = character.getExistence();
+	
 	std::string bool_exists = "0";
 	if (exists == true) {
 		bool_exists = "1";
