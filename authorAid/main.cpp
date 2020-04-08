@@ -10,6 +10,8 @@
 #include <vector>
 #include <sqlite3.h>
 #include <boost/algorithm/string/replace.hpp>
+//#include <boost/algorithm/string.hpp>
+#include <boost/tokenizer.hpp>
 
 #include "Scene.h"
 #include "Character.h"
@@ -102,10 +104,13 @@ int main(int argc, char** argv) {
 	
 	//QUERIES AND TABLE SET UP, TEMPORARY UNTIL SYSTEM MORE ROBUST
 	//tableBaseCreate(dbNameString);
+	//std::string query("UPDATE SCENE SET CHARACTERS = '15N8N14N' WHERE ID=1;");
 	//std::string query("ALTER TABLE SCENE ADD COLUMN EXISTS_BOOL INT (0);");
 	//exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
+	//displayAndError(exit,false);
 	//std::string query(removeIDFromTable(5));
 	//exit = sqlite3_exec(db, create.c_str(), callback, (void*)data.c_str(), NULL);
+
 	//Visual tests
 	
 	queryAllFieldsTable("WORLD",dbNameString);
@@ -271,11 +276,11 @@ int main(int argc, char** argv) {
 				Scene tempScene;
 				int tempSceneCount = 0;
 				bool fromLoad = false;
-				std::string chtrList = " ";
+				std::string chtrList = "";
 				int numCharacters = 0;
 				while (exitScene) {
 					std::cout << "Choose an option: (l)ocation, (t)ime, (n)ame,(d)escription,(notes)"
-						"(add chtr),(v)iew, (save), (exit). " << std::endl;
+						"(add chtr),(v)iew, (save), (load),(exit). " << std::endl;
 					std::string inputSCE;
 					std::getline(std::cin, inputSCE);
 
@@ -325,10 +330,11 @@ int main(int argc, char** argv) {
 						//Clear return
 						returnCount.clear();
 						tempScene.setCharacters(tempChtr);
-												
+						//String representation						
 						std::string idToAdd = std::to_string(idLoadChoice + 1) + "N";
 						chtrList += idToAdd;
 						std::cout << chtrList << std::endl;
+						//POSSIBLY OBSOLETE, AS setCharacters automatically increments this 
 						numCharacters += 1;
 					}
 					else if (inputSCE == "v") {
@@ -352,11 +358,54 @@ int main(int argc, char** argv) {
 							sceneCountWorld = sceneCountersWorld(dbNameString, 0, "read");
 							break;
 						}
-
-						//INCREMENT SCENE NUMBER
 					}
+					//Load Scene. Character load(s) handled here, rest handled in Scene.cpp
 					else if (inputSCE == "load") {
+						tempScene.~Scene();
+						Character tempChtrScene;
+						std::vector <std::string> chtrTokens;
+						int tempID = 0;
+						//std::stringstream myStream;
+						selectFrom("ID,SCENE_NAME,CHARACTERS,NUM_CRCTRS", "SCENE", sceneCountWorld, 0, dbNameString, true);
+						int idLoadChoice = tempSceneCount = inputInt() - 1;
+						if (idLoadChoice < 0 || idLoadChoice > chaCountWorld) {
+							std::cout << "Load Cancelled" << std::endl;
+							break;
+						}
+					
+						//LOAD CHTRS//
+						
+						//External from dbInteract.cpp. Returns from callback used in selectFrom if printOnly = false
+						extern std::vector <std::string> returnCount;
+						//idLoadChoice -= 1;
+						//Select Return
+						selectFrom("CHARACTERS", "SCENE", 1, idLoadChoice, dbNameString, false);
+						std::cout << returnCount.at(0) << std::endl;
+						std::string tempChtrsFromReturn = returnCount.at(0);
+						returnCount.clear();
+						//Tokenize character return list
+						boost::char_separator<char> sep("N");
+						boost::tokenizer<boost::char_separator<char>> tokens(tempChtrsFromReturn, sep);
+						//Extract chtrs from db, and load to tempchtr.
+						for (const auto& t : tokens) {
+							//std::cout << t << std::endl;
+							//chtrTokens.push_back(t);
+							std::stringstream myStream(t);
+							myStream >> tempID;
+							tempID -= 1;
+							selectFrom("ID,NAME,AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER", 1, tempID, dbNameString, false);
+							tempChtrScene.setCharacterFromDb(returnCount);
+							tempScene.setCharacters(tempChtrScene);
+							returnCount.clear();
+							tempChtrScene.~Character();
+						}
+						
+						//LOAD REST//
 
+						selectFrom("LOCATION,TIME_DATE,SCENE_NAME,GEN_DSCRPT,NOTES,SCENE_NUM,NUM_CRCTRS,EXISTS_BOOL","SCENE",1,idLoadChoice,dbNameString,false);
+						tempScene.setSceneFromDb(returnCount);
+						returnCount.clear();
+						fromLoad = true;
 					}
 
 				}
@@ -482,7 +531,7 @@ int main(int argc, char** argv) {
 	sqlite3_close(db);
 return 0;
 }
-//Return from database
+//Return from database//SOON OBSOLETE
 int callback(void* data, int argc, char** argv, char** azColName) { 
 	
 	int i;

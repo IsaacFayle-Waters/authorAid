@@ -32,21 +32,15 @@ public:
 	void setTimeAndOrDate(std::string timeAndOrDate);
 	std::string getTimeAndOrDate() { return timeAndOrDate; };
 
-	//void setSceneName(std::string sceneName);
-	//std::string getSceneName() { return sceneName; };
-
-	//void setNotes(std::string notes);
-	//std::string getNotes() { return notes; };
-
 	void setSceneNumber(int sceneNumber);
 	int getSceneNumber() { return sceneNumber; };
 
 	void setCharacters(Character character);
 	std::vector<Character> getCharacterList();
-
-	//void setGenralDescription(std::string genralDescription);
-	//std::string getGeneralDescription() { return generalDescription; };
 	
 	int getNumberOfCharacters() { return numberOfCharacters; };
+
+	void setSceneFromDb(std::vector <std::string> dbreturn);
+	int convertToInt(std::string convert);
 };
 #endif

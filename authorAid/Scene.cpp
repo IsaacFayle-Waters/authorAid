@@ -27,16 +27,6 @@ void Scene::setTimeAndOrDate(std::string timeAndOrDate)
 	this->timeAndOrDate = timeAndOrDate;
 };
 
-/*void Scene::setSceneName(std::string sceneName)
-{
-	this->sceneName = sceneName;
-};*/
-
-/*void Scene::setNotes(std::string notes)
-{
-	this->notes = notes;
-}*/
-
 void Scene::setSceneNumber(int sceneNumber)
 {
 	this->sceneNumber = sceneNumber;
@@ -49,8 +39,32 @@ void Scene::setCharacters(Character character)
 std::vector<Character> Scene::getCharacterList()
 {
 	return characters;
-};
-/*void Scene::setGenralDescription(std::string genralDescription)
+}
+void Scene::setSceneFromDb(std::vector<std::string> dbreturn)
 {
-	this->generalDescription = genralDescription;
-};*/
+	//int sceneNumInt, nChtrInt, existBoolInt;
+	std::string sceneNum; /*,nChtr;*/
+	//LOCATION, TIME_DATE, SCENE_NAME, GEN_DSCRPT, NOTES, SCENE_NUM, NUM_CRCTRS, EXISTS_BOOL
+	setLocation(dbreturn.at(0));
+	setTimeAndOrDate(dbreturn.at(1));
+	setName(dbreturn.at(2));
+	setDescription(dbreturn.at(3));
+	setNotes(dbreturn.at(4));
+	sceneNum = dbreturn.at(5);
+	setSceneNumber(convertToInt(sceneNum));
+	//Below, probably OBSOLETE due to being automatially updated as chtr's are added. Leaving this
+	//here just in case it is needed.
+	//nChtr = dbreturn.at(6);
+	//setSceneNumber(convertToInt(nChtr));
+	//END OBS
+	setExistence();
+}
+int Scene::convertToInt(std::string convert)
+{
+	int returnInt;
+	std::stringstream myStream(convert);
+	myStream >> returnInt;
+	return returnInt;
+};
+;
+
