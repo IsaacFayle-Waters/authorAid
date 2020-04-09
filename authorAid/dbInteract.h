@@ -3,6 +3,7 @@
 #include <vector>
 #include "Character.h"
 #include "Scene.h"
+#include "Chapter.h"
 //Create base tables. At the moment, only creates character table. 
 void tableBaseCreate(char dbNameString[]);
 //Display all in Table.
@@ -21,11 +22,18 @@ std::string insertSpecific(std::string table, std::string column, std::string va
 void insertCharacter(Character character, int index, int Update_1_Insert_0, char dbNameString[]);
 //Scene loader/Updater
 void insertScene(Scene scene, int index, int Update_1_Insert_0, char dbNameString[], std::string chtrList);
+//Chapter loader/Updater
+void insertChapter(Chapter chapter, int index, int Update_1_Insert_0, char dbNameString[], std::string sceneList);
 //Read and write character counter to World
 int countersWorld(char dbNameString[], int chaCount, std::string readOrWrite);
 //Read and write scene counter to World
 int sceneCountersWorld(char dbNameString[], int sceneCount, std::string readOrWrite);
+//Read and write chapter counter to World
+int chapterCountersWorld(char dbNameString[], int chapterCount, std::string readOrWrite);
+//Simple return from db of number of characters in a scene
 int returnNumberChtrsScene(int sceneCount,char dbNameString[]);
+//Simple return from db of number of scenes in a chapter
+int returnNumberScenesChapter(int chapterCount, char dbNameString[]);
 //db insert error
 void errorInsert(int exit);
 //Callback functions. Second one displays the info, and is probably just for testing.

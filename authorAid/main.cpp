@@ -14,6 +14,10 @@
 //TODO Investigate memory leak possiblities
 
 //TODO DEBUG insert chtr. Load and update possible problems
+//TODO need to find a way to safley delete from db. Update changes yet keep relations.
+
+//TODO File handeling
+//TODO eof completion check table. Possiblly better to wait for a while.
 
 //NOTE! POSSIBLE RE-DESIGN?: INCLUDE Db INTERACTION IN CLASSES INSTEAD? MIGHT MAKE THINGS LESS CONVOLOUTED. 
 
@@ -60,6 +64,7 @@ std::vector <int> deletedIDs;
 int chaCount = 0;//OBSOLETE
 int chaCountWorld = 0;
 int sceneCountWorld = 0;
+int chaptCountWorld = 0;
 
 //Used in a display function. Possibly redundent
 int idCount = 0;
@@ -73,9 +78,10 @@ int testUI = 1;
 int main(int argc, char** argv) {
 	//Read Counters from World Table
 	//countersWorld(dbNameString, 15, "write");
-	//sceneCountersWorld(dbNameString, 0, "write");
+	//chapterCountersWorld(dbNameString, 0, "write");
 	chaCountWorld = countersWorld(dbNameString, 0, "read");
 	sceneCountWorld = sceneCountersWorld(dbNameString, 0, "read");
+	chaptCountWorld = chapterCountersWorld(dbNameString, 0, "read");
 	
 	//updateDb("SCENE", "NUM_CRCTRS", "1", 1, dbNameString);
     //Create db instance
@@ -103,8 +109,8 @@ int main(int argc, char** argv) {
 	//QUERIES AND TABLE SET UP, TEMPORARY UNTIL SYSTEM MORE ROBUST
 	//tableBaseCreate(dbNameString);
 	//std::string query("UPDATE SCENE SET CHARACTERS = '15N8N14N' WHERE ID=1;");
-	//std::string query("ALTER TABLE SCENE ADD COLUMN EXISTS_BOOL INT (0);");
-	//exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
+	std::string query("ALTER TABLE WORLD ADD COLUMN CHAPT_COUNT INT (0);");
+	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
 	//displayAndError(exit,false);
 	//std::string query(removeIDFromTable(5));
 	//exit = sqlite3_exec(db, create.c_str(), callback, (void*)data.c_str(), NULL);
@@ -463,17 +469,19 @@ int main(int argc, char** argv) {
 						std::cout << "Load Cancelled" << std::endl;
 						break;
 					}
-					std::cout << delChoice;
-					removeIDFromTable("SCENE", delChoice, dbNameString);
-					//Prevent counter from getting out of sync
-					if (delChoice == sceneCountWorld) {
-						sceneCountWorld -= 1;
-						sceneCountersWorld(dbNameString,sceneCountWorld, "write");
+						std::cout << delChoice;
+						removeIDFromTable("SCENE", delChoice, dbNameString);
+						//Prevent counter from getting out of sync
+						if (delChoice == sceneCountWorld) {
+							sceneCountWorld -= 1;
+							sceneCountersWorld(dbNameString,sceneCountWorld, "write");
+						}
 					}
-					}
-
 				}
 			}
+			//////////////////////
+			//MAIN CHAPTER LOOP//
+			////////////////////
 			else if (input == "chapter") {
 				//exit condition
 				int exitChapter = 1;
@@ -486,12 +494,80 @@ int main(int argc, char** argv) {
 				while (exitChapter) {
 					std::string inputCHPT;
 					std::getline(std::cin, inputCHPT);
-
 					//Exit Condition
 					if (inputCHPT == "exit") {
 						exitChapter = 0;
 						tempChapt.~Chapter();
 						break;
+					}
+					else if (inputCHPT == "n") {
+						tempChapt.setName(inputChtrChoice("Name the chapter?"));
+					}
+					else if (inputCHPT == "d") {
+						tempChapt.setDescription(inputChtrChoice("Describe the chapter: "));
+					}
+					else if (inputCHPT == "notes") {
+						tempChapt.setNotes(inputChtrChoice("Any notes to make about this chapter? "));
+					}
+					else if (inputCHPT == "v") {
+						printChapterInfo(tempChapt);
+					}
+					else if (inputCHPT == "add scene") {
+						Scene tempScene;
+						std::cout << "Select Scene ID from list, or -1 to cancel: ";
+						selectFrom("ID,SCENE_NAME,SCENE_NUM", "SCENE", sceneCountWorld, 0, dbNameString, true);
+						//Select Scene by ID number
+						int idLoadChoice = inputInt();
+						if (idLoadChoice < 0 || idLoadChoice > sceneCountWorld) {
+							std::cout << "Load Cancelled" << std::endl;
+							break;
+						}
+
+						extern std::vector <std::string> returnCount;
+						//Select Return
+						//returnCount.clear();
+						selectFrom("LOCATION,TIME_DATE,SCENE_NAME,GEN_DSCRPT,NOTES,SCENE_NUM,EXISTS_BOOL", "SCENE", 1, idLoadChoice, dbNameString, false);
+						//Destructor
+						tempScene.~Scene();
+						//Return from selectFrom, adds details to tempchar.
+						//tempChtr.setCharacterFromDb(returnCount);
+						tempScene.setSceneFromDb(returnCount);
+						//Clear return
+						returnCount.clear();
+						
+						//tempScene.setCharacters(tempChtr);
+						tempChapt.setScenes(tempScene);
+						//String representation						
+						std::string idToAdd = std::to_string(idLoadChoice) + "N";
+						sceneList += idToAdd;
+						std::cout << sceneList << std::endl;
+						// (?)
+						//numScenes = returnNumberScenesChapter(chaptCountWorld, dbNameString);
+						numScenes += 1;
+					}
+					else if (inputCHPT == "rem scene") {
+						std::cout << "Remove" << std::endl;
+					}
+					else if (inputCHPT == "save") {
+						if (fromLoad == true) {
+							sceneCountWorld = tempChaptCount + 1;
+						}
+						//Check existence of scene
+						if (tempChapt.getExistence() == false) {
+							tempChapt.setExistence();
+							chaptCountWorld += 1;
+							//insertScene(tempScene, sceneCountWorld, 0, dbNameString, chtrList);
+							insertChapter(tempChapt, chaptCountWorld, 0, dbNameString, sceneList);
+							chapterCountersWorld(dbNameString, chaptCountWorld, "write");
+							//sceneCountersWorld(dbNameString, sceneCountWorld, "write");
+							break; 
+						}
+						//If the character exists, then it is simply updated. Reset chaCountWorld after.
+						else if (tempChapt.getExistence() == true) {
+							insertChapter(tempChapt, chaptCountWorld, 1, dbNameString, sceneList);;
+							sceneCountWorld = sceneCountersWorld(dbNameString, 0, "read");
+							break;
+						}
 					}
 				}
 			}
@@ -660,6 +736,10 @@ int inputInt()
 	while (true) {
 		std::cout << "Please enter a valid number: ";
 		std::getline(std::cin, input);
+		if (input == "exit") {
+			id = -1;
+			break;
+		}
 		// This converts from string to int.
 		std::stringstream myStream(input);
 		if (myStream >> id)
@@ -726,7 +806,10 @@ void printCharacterInfo(Character character)
 void printChapterInfo(Chapter chapter)
 {   //Number of scenes
 	std::cout << "Chapter No: " << chapter.getChapterNumber() << std::endl;
+	std::cout << "Chapter Name: " << chapter.getName() << std::endl;
 	std::cout << "Scenes in Chapter: " << chapter.getNumberOfScenes() << std::endl;
+	std::cout << "Chapter Description: " << chapter.getDescription() << std::endl;
+	std::cout << "Chapter Notes: " << chapter.getNotes() << std::endl;
 	int chapSize = chapter.getSceneList().size();
 	if (chapSize != 0) {
 		for (int i = 0; i < chapSize; i++) {

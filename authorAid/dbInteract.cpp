@@ -39,6 +39,7 @@ void tableBaseCreate(char dbNameString[])
 		"CHPTR_NAME		TEXT		 NULL, "
 		"SCENES			TEXT		 NULL, "
 		"NUM_SCENES		INT		 NOT NULL, "
+		"GEN_DSCRPT		TEXT		 NULL, "
 		"NOTES          TEXT         NULL, "
 		"EXISTS_BOOL    INT      NOT NULL);"
 		
@@ -61,7 +62,8 @@ void tableBaseCreate(char dbNameString[])
 		"NAME			TEXT		 NULL, "
 		"DESCRIPTION    TEXT         NULL, "
 		"NOTES          TEXT         NULL, "
-		"EXISTS_BOOL    INT      NOT NULL);"
+		"EXISTS_BOOL    INT      NOT NULL, "
+		"CHAPT_COUNT    INT      NOT NULL);"
 		;
 
 	sqlite3* db;
@@ -248,6 +250,48 @@ void insertScene(Scene scene, int index, int Update_1_Insert_0, char dbNameStrin
 	errorInsert(exit);
 	sqlite3_close(db);
 }
+void insertChapter(Chapter chapter, int index, int Update_1_Insert_0, char dbNameString[], std::string sceneList)
+{
+	std::string sql;
+
+	std::string newdex = std::to_string(index);
+	int chaptNumInt = chapter.getChapterNumber();
+	std::string chaptNum = std::to_string(chaptNumInt);
+	std::string name = chapter.getName();
+	std::string scenes = sceneList;
+	int numScenesInt = chapter.getNumberOfScenes();
+	std::string numScenes = std::to_string(numScenesInt);
+	std::string genDSCRPT = chapter.getDescription();
+	std::string notes = chapter.getNotes();
+	bool exists = chapter.getExistence();
+
+	std::string bool_exists = "0";
+	if (exists == true) {
+		bool_exists = "1";
+	}
+
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
+
+	if (Update_1_Insert_0 == 0) {
+		sql = ("INSERT INTO CHAPTER (ID, CHPTR_NUM, CHPTR_NAME, SCENES, NUM_SCENES, GEN_DSCRPT, NOTES, EXISTS_BOOL)" 
+			"VALUES(" + newdex + "," + chaptNum + ",'" + name + "','" + scenes + "'," + numScenes + ",'"
+			+ genDSCRPT + "','" + notes + "', " + bool_exists + ");");
+		std::cout << sql << std::endl;
+	}
+	else if (Update_1_Insert_0 == 1) {
+		sql = ("UPDATE CHAPTER SET CHPTR_NUM = " + chaptNum + ", CHPTR_NAME = '" + name + "', SCENES = '" + sceneList + "', NUM_SCENES = "+numScenes+", GEN_DSCRPT = '" + genDSCRPT + "', "
+			"NOTES = '" + notes +"', EXISTS_BOOL = "+ bool_exists +" WHERE ID = " + newdex + ";");
+		std::cout << sql << std::endl;
+	}
+	else {
+		std::cout << std::endl << "ERROR Scene SELECTION" << std::endl;
+	}
+	exit = sqlite3_exec(db, sql.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
+	errorInsert(exit);
+	sqlite3_close(db);
+}
 //Read and write counters from db
 int countersWorld(char dbNameString[],int chaCount, std::string readOrWrite)
 {
@@ -314,6 +358,38 @@ int sceneCountersWorld(char dbNameString[], int sceneCount, std::string readOrWr
 	sqlite3_close(db);
 }
 
+int chapterCountersWorld(char dbNameString[], int chapterCount, std::string readOrWrite)
+{
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
+	std::string chapterCounter = std::to_string(chapterCount);
+	if (readOrWrite == "read") {
+		int ret = 0;
+		returnCount.clear();
+		std::string sqlRead("SELECT CHAPT_COUNT FROM WORLD;");
+		exit = sqlite3_exec(db, sqlRead.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
+		std::string retCount = returnCount.at(0);
+
+		std::stringstream myStream(retCount);
+		myStream >> ret;
+		returnCount.clear();
+		errorInsert(exit);
+		return ret;
+	}
+	else if (readOrWrite == "write") {
+
+		std::string sqlWrite("UPDATE WORLD SET CHAPT_COUNT = " + chapterCounter + ";");
+		exit = sqlite3_exec(db, sqlWrite.c_str(), 0, 0, NULL);
+		errorInsert(exit);
+	}
+	else {
+		std::cerr << "Counter error" << std::endl;
+	}
+	sqlite3_close(db);
+
+}
+
 int returnNumberChtrsScene(int sceneCount, char dbNameString[])
 {
 	std::string id = std::to_string(sceneCount);
@@ -333,6 +409,28 @@ int returnNumberChtrsScene(int sceneCount, char dbNameString[])
 	sqlite3_close(db);
 	returnCount.clear();
 	
+	return ret;
+}
+
+int returnNumberScenesChapter(int chapterCount, char dbNameString[])
+{
+	std::string id = std::to_string(chapterCount);
+	std::string sqlRead("SELECT SCENE_NUM FROM CHAPTER WHERE ID = " + id + ";");
+	int ret = 0;
+
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
+	returnCount.clear();
+	exit = sqlite3_exec(db, sqlRead.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
+	errorInsert(exit);
+
+	Scene conv;
+	ret = conv.convertToInt(returnCount.at(0));
+
+	sqlite3_close(db);
+	returnCount.clear();
+
 	return ret;
 }
 

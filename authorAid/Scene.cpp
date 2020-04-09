@@ -50,7 +50,7 @@ void Scene::removeCharacterFromList(int elementIndex)
 void Scene::setSceneFromDb(std::vector<std::string> dbreturn)
 {
 	//int sceneNumInt, nChtrInt, existBoolInt;
-	std::string sceneNum; /*,nChtr;*/
+	std::string sceneNum, nChtr;
 	//LOCATION, TIME_DATE, SCENE_NAME, GEN_DSCRPT, NOTES, SCENE_NUM, NUM_CRCTRS, EXISTS_BOOL
 	setLocation(dbreturn.at(0));
 	setTimeAndOrDate(dbreturn.at(1));
@@ -61,7 +61,7 @@ void Scene::setSceneFromDb(std::vector<std::string> dbreturn)
 	setSceneNumber(convertToInt(sceneNum));
 	//Below, probably OBSOLETE due to being automatially updated as chtr's are added. Leaving this
 	//here just in case it is needed.
-	//nChtr = dbreturn.at(6);
+	nChtr = dbreturn.at(6);
 	//setSceneNumber(convertToInt(nChtr));
 	//END OBS
 	setExistence();
