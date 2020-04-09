@@ -2,6 +2,10 @@
 
 Chapter::Chapter() = default;
 
+Chapter::~Chapter()
+{
+};
+
 Chapter::Chapter(int chapterNumber, std::string chapterName)
 {
 	setChapterNumber(chapterNumber);

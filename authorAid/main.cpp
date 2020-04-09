@@ -14,7 +14,6 @@
 //TODO Investigate memory leak possiblities
 
 //TODO DEBUG insert chtr. Load and update possible problems
-//TODO DEBUG Update scene does not work after loading scene. Possibly same problem in insert chtr. 
 
 //NOTE! POSSIBLE RE-DESIGN?: INCLUDE Db INTERACTION IN CLASSES INSTEAD? MIGHT MAKE THINGS LESS CONVOLOUTED. 
 
@@ -84,11 +83,6 @@ int main(int argc, char** argv) {
 	//exit deals with sqlite read and write	
 	int exit = 0;
 	
-	/*std::string testCL = "3,4,8";
-	Scene test;
-	insertScene(test, 1, 0, dbNameString, testCL);
-	insertScene(test, 1, 1, dbNameString, testCL);*/
-
 	//Open db
 	//TESTING PURPOSES DBs
 	if (updateTest == 0){ 
@@ -105,6 +99,7 @@ int main(int argc, char** argv) {
 		exit = sqlite3_open(dbNameString2, &db);
 	}
 	
+	//dropT("CHAPTER", dbNameString);
 	//QUERIES AND TABLE SET UP, TEMPORARY UNTIL SYSTEM MORE ROBUST
 	//tableBaseCreate(dbNameString);
 	//std::string query("UPDATE SCENE SET CHARACTERS = '15N8N14N' WHERE ID=1;");
@@ -283,7 +278,6 @@ int main(int argc, char** argv) {
 				bool fromLoad = false;
 				std::string chtrList = "";
 				int numCharacters = 0;
-				int removalID = 0;
 				while (exitScene) {
 					std::cout << "Choose an option: (l)ocation, (t)ime, (n)ame,(d)escription,(notes)"
 						"(add chtr), (rem)ove (chtr),(v)iew, (save), (load),(exit). " << std::endl;
@@ -318,8 +312,6 @@ int main(int argc, char** argv) {
 					}
 					else if (inputSCE == "add chtr") {
 						Character tempChtr;
-						tempChtr.setRemovalID(removalID);
-						removalID += 1;
 						std::cout << "Select Character ID from list, or -1 to cancel: ";
 						selectFrom("ID,NAME", "CHARACTER", chaCountWorld, 0, dbNameString, true);
 						//Select Character by ID number
@@ -346,24 +338,26 @@ int main(int argc, char** argv) {
 						numCharacters = returnNumberChtrsScene(sceneCountWorld, dbNameString);
 						numCharacters += 1;
 					}
+					//Remove Character from Loaded scene (i.e. remove from db), or temp pre-saved scene
 					else if (inputSCE == "rem chtr") {
+						//Remove from load/db
 						if (fromLoad == true) {
 							sceneCountWorld = tempSceneCount + 1;
-
+							///Who to remove
 							selectFrom("CHARACTERS", "SCENE", 1, sceneCountWorld - 1, dbNameString, true);
 							std::cout << "Select Character ID from list, or -1 to cancel: ";
 							/////HMMMMM!!!!!!!				
-
-							//std::cout << returnCount.at(0);
 							int idLoadChoice = inputInt();
 							if (idLoadChoice < 0 || idLoadChoice > chaCountWorld) {
 								std::cout << "removal Cancelled" << std::endl;
 								break;
 							}
 							//SHOULD BE IN SAVE?
+							//Covert element to remove, add delimiter 'N'
 							std::string quickConvert = std::to_string(idLoadChoice);
 							std::string quickConvertNumChtrs = "";
 							quickConvert += "N";
+							//Remove from string and update db
 							boost::erase_all(chtrList, quickConvert);
 							updateDb("SCENE", "CHARACTERS", chtrList, sceneCountWorld, dbNameString);
 							//Decrement num chtrs
@@ -371,10 +365,11 @@ int main(int argc, char** argv) {
 							numCharacters -= 1;
 							quickConvertNumChtrs = std::to_string(numCharacters);
 							updateDb("SCENE", "NUM_CRCTRS", quickConvertNumChtrs, sceneCountWorld, dbNameString);
+							//Reset scene counter (Possibly needless)
 							sceneCountWorld = sceneCountersWorld(dbNameString, 0, "read");
-							std::cout << std::endl;
 							break;
 						}
+						//remove from new pre-saved scene
 						else {
 							int rmLim = tempScene.getCharacterList().size();
 							int removeThisEle = 0;
@@ -460,7 +455,44 @@ int main(int argc, char** argv) {
 						returnCount.clear();
 						fromLoad = true;
 					}
+					else if (inputSCE == "del") {
+					selectFrom("ID,SCENE_NAME", "SCENE", sceneCountWorld, 0, dbNameString, true);
+					std::cout << "Choose by id. -1 to cancel delete process: " << std::endl;
+					int delChoice = inputInt();
+					if (delChoice < 0 || delChoice > sceneCountWorld) {
+						std::cout << "Load Cancelled" << std::endl;
+						break;
+					}
+					std::cout << delChoice;
+					removeIDFromTable("SCENE", delChoice, dbNameString);
+					//Prevent counter from getting out of sync
+					if (delChoice == sceneCountWorld) {
+						sceneCountWorld -= 1;
+						sceneCountersWorld(dbNameString,sceneCountWorld, "write");
+					}
+					}
 
+				}
+			}
+			else if (input == "chapter") {
+				//exit condition
+				int exitChapter = 1;
+				//Character class temp
+				Chapter tempChapt;
+				bool fromLoad = false;
+				int tempChaptCount = 0;
+				std::string sceneList = "";
+				int numScenes = 0;
+				while (exitChapter) {
+					std::string inputCHPT;
+					std::getline(std::cin, inputCHPT);
+
+					//Exit Condition
+					if (inputCHPT == "exit") {
+						exitChapter = 0;
+						tempChapt.~Chapter();
+						break;
+					}
 				}
 			}
 		}

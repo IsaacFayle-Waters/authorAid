@@ -11,14 +11,12 @@ private:
 	int locationCount = 0;
 	int sceneCount = 0;
 
-	int removalID = 0;
-	//std::vector <class cl> vec;
-
 	std::string name = "No Name";
 	std::string description = "No Description";
 	std::string notes = "No Notes";
 
 	bool exists = false;
+	
 
 public:
 	void setName(std::string name);
@@ -32,10 +30,8 @@ public:
 
 	void setExistence();
 	bool getExistence() { return exists; };
-	void setRemovalID(int rem);
-	int getRemovalID() { return removalID; };
 
-	//void removeElementFromVector(std::vector <class cl> vec ,int remSelect);
+	
 };
 //General information about Places
 	//List of places (Subplaces?)

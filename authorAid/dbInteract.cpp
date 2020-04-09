@@ -37,7 +37,7 @@ void tableBaseCreate(char dbNameString[])
 		"ID INT PRIMARY KEY      NOT NULL, "
 		"CHPTR_NUM		INT			 NULL, "
 		"CHPTR_NAME		TEXT		 NULL, "
-		"SCENES			BLOB		 NULL, "
+		"SCENES			TEXT		 NULL, "
 		"NUM_SCENES		INT		 NOT NULL, "
 		"NOTES          TEXT         NULL, "
 		"EXISTS_BOOL    INT      NOT NULL);"
@@ -50,7 +50,8 @@ void tableBaseCreate(char dbNameString[])
 		"GEN_DSCRPT		TEXT		 NULL, "
 		"CHAPTERS		BLOB		 NULL, "
 		"NUM_CHAPTERS   INT		 NOT NULL, "
-		"NOTES			TEXT		 NULL);"
+		"NOTES			TEXT		 NULL, "
+		"EXISTS_BOOL    INT      NOT NULL);"
 
 		"CREATE TABLE IF NOT EXISTS WORLD("
 		"ID INT PRIMARY KEY      NOT NULL, "

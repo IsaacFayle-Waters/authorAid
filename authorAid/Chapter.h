@@ -14,6 +14,7 @@ private:
 
 public:
 	Chapter();
+	~Chapter();
 	Chapter(int chapterNumber, std::string chapterName="");
 
 	void setChapterNumber(int chapterNumber);

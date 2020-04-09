@@ -26,12 +26,5 @@ void World::setExistence()
 		std::cout << "Existence already true" << std::endl;
 	}
 }
-void World::setRemovalID(int rem)
-{
-	this->removalID = rem;
-}
-/*void World::removeElementFromVector(std::vector <class cl> vec,int remSelect)
-{
-	vec().erase(remSelect);
-}*/
+
 ;
