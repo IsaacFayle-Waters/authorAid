@@ -37,7 +37,7 @@ public:
 
 	void setCharacters(Character character);
 	std::vector<Character> getCharacterList();
-		
+	void removeCharacterFromList(int elementIndex);
 	int getNumberOfCharacters() { return numberOfCharacters; };
 
 	void setSceneFromDb(std::vector <std::string> dbreturn);

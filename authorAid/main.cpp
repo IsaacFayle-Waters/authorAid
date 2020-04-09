@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
 	chaCountWorld = countersWorld(dbNameString, 0, "read");
 	sceneCountWorld = sceneCountersWorld(dbNameString, 0, "read");
 	
-	updateDb("SCENE", "NUM_CRCTRS", "1", 1, dbNameString);
+	//updateDb("SCENE", "NUM_CRCTRS", "1", 1, dbNameString);
     //Create db instance
 	sqlite3 *db;
 	//exit deals with sqlite read and write	
@@ -277,11 +277,13 @@ int main(int argc, char** argv) {
 			else if (input == "scene") {
 				//exit condition
 				int exitScene = 1;
+				//Various variables. Most of them probably even needed.
 				Scene tempScene;
 				int tempSceneCount = 0;
 				bool fromLoad = false;
 				std::string chtrList = "";
 				int numCharacters = 0;
+				int removalID = 0;
 				while (exitScene) {
 					std::cout << "Choose an option: (l)ocation, (t)ime, (n)ame,(d)escription,(notes)"
 						"(add chtr), (rem)ove (chtr),(v)iew, (save), (load),(exit). " << std::endl;
@@ -316,6 +318,8 @@ int main(int argc, char** argv) {
 					}
 					else if (inputSCE == "add chtr") {
 						Character tempChtr;
+						tempChtr.setRemovalID(removalID);
+						removalID += 1;
 						std::cout << "Select Character ID from list, or -1 to cancel: ";
 						selectFrom("ID,NAME", "CHARACTER", chaCountWorld, 0, dbNameString, true);
 						//Select Character by ID number
@@ -345,33 +349,45 @@ int main(int argc, char** argv) {
 					else if (inputSCE == "rem chtr") {
 						if (fromLoad == true) {
 							sceneCountWorld = tempSceneCount + 1;
-						}
 
-						selectFrom("CHARACTERS", "SCENE", 1, sceneCountWorld - 1, dbNameString, true);
-						std::cout << "Select Character ID from list, or -1 to cancel: ";
-						/////HMMMMM!!!!!!!				
-						
-						//std::cout << returnCount.at(0);
-						int idLoadChoice = inputInt();
-						if (idLoadChoice < 0 || idLoadChoice > chaCountWorld) {
-							std::cout << "Load Cancelled" << std::endl;
+							selectFrom("CHARACTERS", "SCENE", 1, sceneCountWorld - 1, dbNameString, true);
+							std::cout << "Select Character ID from list, or -1 to cancel: ";
+							/////HMMMMM!!!!!!!				
+
+							//std::cout << returnCount.at(0);
+							int idLoadChoice = inputInt();
+							if (idLoadChoice < 0 || idLoadChoice > chaCountWorld) {
+								std::cout << "removal Cancelled" << std::endl;
+								break;
+							}
+							//SHOULD BE IN SAVE?
+							std::string quickConvert = std::to_string(idLoadChoice);
+							std::string quickConvertNumChtrs = "";
+							quickConvert += "N";
+							boost::erase_all(chtrList, quickConvert);
+							updateDb("SCENE", "CHARACTERS", chtrList, sceneCountWorld, dbNameString);
+							//Decrement num chtrs
+							int numCharacters = returnNumberChtrsScene(sceneCountWorld, dbNameString);
+							numCharacters -= 1;
+							quickConvertNumChtrs = std::to_string(numCharacters);
+							updateDb("SCENE", "NUM_CRCTRS", quickConvertNumChtrs, sceneCountWorld, dbNameString);
+							sceneCountWorld = sceneCountersWorld(dbNameString, 0, "read");
+							std::cout << std::endl;
 							break;
 						}
-
-						//SHOULD BE IN SAVE?
-						std::string quickConvert = std::to_string(idLoadChoice);
-						std::string quickConvertNumChtrs = "";
-						quickConvert += "N";
-						boost::erase_all(chtrList, quickConvert);
-						updateDb("SCENE", "CHARACTERS", chtrList, sceneCountWorld,dbNameString);
-						//Decrement num chtrs
-						int numCharacters = returnNumberChtrsScene(sceneCountWorld, dbNameString);
-						numCharacters -= 1;
-						quickConvertNumChtrs = std::to_string(numCharacters);
-						updateDb("SCENE", "NUM_CRCTRS", quickConvertNumChtrs, sceneCountWorld, dbNameString);
-						sceneCountWorld = sceneCountersWorld(dbNameString, 0, "read");
-						std::cout << std::endl;
-						break;
+						else {
+							int rmLim = tempScene.getCharacterList().size();
+							int removeThisEle = 0;
+							for (int rmc = 0; rmc < rmLim; rmc++) {
+								std::cout << rmc << " ";
+								std::cout << tempScene.getCharacterList().at(rmc).getName() << "  ";
+							}
+							std::cout << "Select Character ID from list, or -1 to cancel: ";
+							removeThisEle = inputInt();
+							tempScene.removeCharacterFromList(removeThisEle);
+							numCharacters -= 1;
+							//break;
+						}
 					}
 					else if (inputSCE == "v") {
 						printSceneInfo(tempScene,true);

@@ -41,6 +41,12 @@ std::vector<Character> Scene::getCharacterList()
 	return characters;
 }
 
+void Scene::removeCharacterFromList(int elementIndex)
+{
+	
+	this->characters.erase(characters.begin() + elementIndex);
+}
+
 void Scene::setSceneFromDb(std::vector<std::string> dbreturn)
 {
 	//int sceneNumInt, nChtrInt, existBoolInt;

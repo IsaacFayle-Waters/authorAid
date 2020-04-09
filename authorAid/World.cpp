@@ -1,4 +1,5 @@
 #include "World.h"
+#include <vector>
 
 void World::setName(std::string name)
 {
@@ -24,4 +25,13 @@ void World::setExistence()
 	else {
 		std::cout << "Existence already true" << std::endl;
 	}
-};
+}
+void World::setRemovalID(int rem)
+{
+	this->removalID = rem;
+}
+/*void World::removeElementFromVector(std::vector <class cl> vec,int remSelect)
+{
+	vec().erase(remSelect);
+}*/
+;
