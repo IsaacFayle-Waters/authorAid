@@ -3,6 +3,21 @@
 //or what story the character belongs to yet. Similarly a scene may be imagined without characters, etc.
 //
 //On the other had the user should have a sturdy framework to work with if they so choose.
+
+//TODO GUI
+
+//TODO Pass some menu options/sections of code as functions instead. Getting a little messy as is.
+//Same for some of the dbInteract sections. Code could tip towards being difficult to maintain.
+///Too much repeated code///. Example: counter functions could be merged.
+
+//TODO take steps to prevent sql injection
+//TODO Investigate memory leak possiblities
+
+//TODO DEBUG insert chtr. Load and update possible problems
+//TODO DEBUG Update scene does not work after loading scene. Possibly same problem in insert chtr. 
+
+//NOTE! POSSIBLE RE-DESIGN?: INCLUDE Db INTERACTION IN CLASSES INSTEAD? MIGHT MAKE THINGS LESS CONVOLOUTED. 
+
 #include <iostream>
 #include <stdio.h>
 #include <string>
@@ -10,7 +25,7 @@
 #include <vector>
 #include <sqlite3.h>
 #include <boost/algorithm/string/replace.hpp>
-//#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 
 #include "Scene.h"
@@ -56,18 +71,6 @@ int visTest = 0;
 int updateTest = 1;
 int testUI = 1;
 
-//TODO GUI
-
-//TODO Pass some menu options/sections of code as functions instead. Getting a little messy as is.
-//Same for some of the dbInteract sections. Code could tip towards being difficult to maintain.
-///Too much repeated code///. Example: counter functions could be merged.
-
-//TODO take steps to prevent sql injection
-
-//TODO Investigate memory leak possiblities
-
-//TODO DEBUG insert chtr. Load and upload possible problems
-
 int main(int argc, char** argv) {
 	//Read Counters from World Table
 	//countersWorld(dbNameString, 15, "write");
@@ -75,7 +78,7 @@ int main(int argc, char** argv) {
 	chaCountWorld = countersWorld(dbNameString, 0, "read");
 	sceneCountWorld = sceneCountersWorld(dbNameString, 0, "read");
 	
-
+	updateDb("SCENE", "NUM_CRCTRS", "1", 1, dbNameString);
     //Create db instance
 	sqlite3 *db;
 	//exit deals with sqlite read and write	
@@ -114,6 +117,7 @@ int main(int argc, char** argv) {
 	//Visual tests
 	
 	queryAllFieldsTable("WORLD",dbNameString);
+	queryAllFieldsTable("SCENE", dbNameString);
 	queryAllFieldsTable("CHARACTER", dbNameString);
 	returnThis.clear();
 	identifyThis.clear();
@@ -280,7 +284,7 @@ int main(int argc, char** argv) {
 				int numCharacters = 0;
 				while (exitScene) {
 					std::cout << "Choose an option: (l)ocation, (t)ime, (n)ame,(d)escription,(notes)"
-						"(add chtr),(v)iew, (save), (load),(exit). " << std::endl;
+						"(add chtr), (rem)ove (chtr),(v)iew, (save), (load),(exit). " << std::endl;
 					std::string inputSCE;
 					std::getline(std::cin, inputSCE);
 
@@ -334,8 +338,40 @@ int main(int argc, char** argv) {
 						std::string idToAdd = std::to_string(idLoadChoice + 1) + "N";
 						chtrList += idToAdd;
 						std::cout << chtrList << std::endl;
-						//POSSIBLY OBSOLETE, AS setCharacters automatically increments this 
+						//POSSIBLY OBSOLETE, AS setCharacters automatically increments this (?)
+						numCharacters = returnNumberChtrsScene(sceneCountWorld, dbNameString);
 						numCharacters += 1;
+					}
+					else if (inputSCE == "rem chtr") {
+						if (fromLoad == true) {
+							sceneCountWorld = tempSceneCount + 1;
+						}
+
+						selectFrom("CHARACTERS", "SCENE", 1, sceneCountWorld - 1, dbNameString, true);
+						std::cout << "Select Character ID from list, or -1 to cancel: ";
+						/////HMMMMM!!!!!!!				
+						
+						//std::cout << returnCount.at(0);
+						int idLoadChoice = inputInt();
+						if (idLoadChoice < 0 || idLoadChoice > chaCountWorld) {
+							std::cout << "Load Cancelled" << std::endl;
+							break;
+						}
+
+						//SHOULD BE IN SAVE?
+						std::string quickConvert = std::to_string(idLoadChoice);
+						std::string quickConvertNumChtrs = "";
+						quickConvert += "N";
+						boost::erase_all(chtrList, quickConvert);
+						updateDb("SCENE", "CHARACTERS", chtrList, sceneCountWorld,dbNameString);
+						//Decrement num chtrs
+						int numCharacters = returnNumberChtrsScene(sceneCountWorld, dbNameString);
+						numCharacters -= 1;
+						quickConvertNumChtrs = std::to_string(numCharacters);
+						updateDb("SCENE", "NUM_CRCTRS", quickConvertNumChtrs, sceneCountWorld, dbNameString);
+						sceneCountWorld = sceneCountersWorld(dbNameString, 0, "read");
+						std::cout << std::endl;
+						break;
 					}
 					else if (inputSCE == "v") {
 						printSceneInfo(tempScene,true);
@@ -343,7 +379,7 @@ int main(int argc, char** argv) {
 					else if (inputSCE == "save") {
 						//Check to see if Character details were loaded, if so, deal with ID position from load
 						if (fromLoad == true) {
-							sceneCountWorld = tempSceneCount;
+							sceneCountWorld = tempSceneCount + 1;
 						}
 						//Check existence of scene
 						if (tempScene.getExistence() == false) {
@@ -351,6 +387,7 @@ int main(int argc, char** argv) {
 							sceneCountWorld += 1;
 							insertScene(tempScene, sceneCountWorld, 0, dbNameString, chtrList);
 							sceneCountersWorld(dbNameString, sceneCountWorld, "write");
+							break;
 						}
 						//If the character exists, then it is simply updated. Reset chaCountWorld after.
 						else if (tempScene.getExistence() == true) {
@@ -365,6 +402,8 @@ int main(int argc, char** argv) {
 						Character tempChtrScene;
 						std::vector <std::string> chtrTokens;
 						int tempID = 0;
+						std::string tempCharacter;
+						chtrList = "";
 						//std::stringstream myStream;
 						selectFrom("ID,SCENE_NAME,CHARACTERS,NUM_CRCTRS", "SCENE", sceneCountWorld, 0, dbNameString, true);
 						int idLoadChoice = tempSceneCount = inputInt() - 1;
@@ -372,36 +411,34 @@ int main(int argc, char** argv) {
 							std::cout << "Load Cancelled" << std::endl;
 							break;
 						}
-					
 						//LOAD CHTRS//
-						
 						//External from dbInteract.cpp. Returns from callback used in selectFrom if printOnly = false
 						extern std::vector <std::string> returnCount;
-						//idLoadChoice -= 1;
 						//Select Return
 						selectFrom("CHARACTERS", "SCENE", 1, idLoadChoice, dbNameString, false);
 						std::cout << returnCount.at(0) << std::endl;
-						std::string tempChtrsFromReturn = returnCount.at(0);
+						std::string tempChtrsFromReturn = chtrList = returnCount.at(0);
 						returnCount.clear();
 						//Tokenize character return list
 						boost::char_separator<char> sep("N");
 						boost::tokenizer<boost::char_separator<char>> tokens(tempChtrsFromReturn, sep);
-						//Extract chtrs from db, and load to tempchtr.
+						//Extract CHARACTES from db, and LOAD to tempchtr.
 						for (const auto& t : tokens) {
 							//std::cout << t << std::endl;
 							//chtrTokens.push_back(t);
+							
 							std::stringstream myStream(t);
 							myStream >> tempID;
+							//myStream >> tempCharacter;
 							tempID -= 1;
+							
 							selectFrom("ID,NAME,AGE, DESCRIPTION, MOTIVE, GENDER, NOTES", "CHARACTER", 1, tempID, dbNameString, false);
 							tempChtrScene.setCharacterFromDb(returnCount);
 							tempScene.setCharacters(tempChtrScene);
 							returnCount.clear();
 							tempChtrScene.~Character();
 						}
-						
 						//LOAD REST//
-
 						selectFrom("LOCATION,TIME_DATE,SCENE_NAME,GEN_DSCRPT,NOTES,SCENE_NUM,NUM_CRCTRS,EXISTS_BOOL","SCENE",1,idLoadChoice,dbNameString,false);
 						tempScene.setSceneFromDb(returnCount);
 						returnCount.clear();

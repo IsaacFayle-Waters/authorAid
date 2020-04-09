@@ -14,7 +14,7 @@ void removeIDFromTable(std::string table, int id, char dbNameString[]);
 //select something from table
 void selectFrom(std::string selection, std::string fromTable, int limit, int offset, char dbNameString[], bool printOnly);
 //Update values
-std::string updateDb(std::string table, std::string column, std::string value, int id);
+void updateDb(std::string table, std::string column, std::string value, int id, char dbNameString[]);
 //Insert new item into table, via specific sql string.
 std::string insertSpecific(std::string table, std::string column, std::string value, int id, bool idOnOff);
 //Character loader/Updater
@@ -25,6 +25,7 @@ void insertScene(Scene scene, int index, int Update_1_Insert_0, char dbNameStrin
 int countersWorld(char dbNameString[], int chaCount, std::string readOrWrite);
 //Read and write scene counter to World
 int sceneCountersWorld(char dbNameString[], int sceneCount, std::string readOrWrite);
+int returnNumberChtrsScene(int sceneCount,char dbNameString[]);
 //db insert error
 void errorInsert(int exit);
 //Callback functions. Second one displays the info, and is probably just for testing.

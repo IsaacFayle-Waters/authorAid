@@ -40,6 +40,7 @@ std::vector<Character> Scene::getCharacterList()
 {
 	return characters;
 }
+
 void Scene::setSceneFromDb(std::vector<std::string> dbreturn)
 {
 	//int sceneNumInt, nChtrInt, existBoolInt;

@@ -115,7 +115,7 @@ void selectFrom(std::string selection, std::string fromTable,int limit, int offs
 	std::string lim = std::to_string(limit);
 	std::string offs = std::to_string(offset);
 	std::string sql = "SELECT " + selection + " FROM " + fromTable +" LIMIT "+ lim +" OFFSET "+ offs +";";
-
+	std::cout << sql << std::endl;
 	if (printOnly == true) {
 		exit = sqlite3_exec(db, sql.c_str(), callbackDbPrint, NULL, NULL);
 	}
@@ -130,14 +130,22 @@ void selectFrom(std::string selection, std::string fromTable,int limit, int offs
 	sqlite3_close(db);
 	//return sql;
 }
-std::string updateDb(std::string table, std::string column, std::string value, int id)
-{	 
+void updateDb(std::string table, std::string column, std::string value, int id,char dbNameString[])
+{
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
+
 	std::string sID = std::to_string(id);
 	
 	std::string sql("UPDATE "+table+" SET "+column+" = '"+value+"' WHERE ID = "+sID+";");
-	
-	return sql;
+	std::cout << sql << std::endl;
+	returnCount.clear();
+	exit = sqlite3_exec(db, sql.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
+	errorInsert(exit);
+	sqlite3_close(db);
 }
+	
 //insert something into a table. Name of Table, 
 std::string insertSpecific(std::string table, std::string column, std::string value, int id, bool idOnOff)
 {
@@ -225,12 +233,12 @@ void insertScene(Scene scene, int index, int Update_1_Insert_0, char dbNameStrin
 	if (Update_1_Insert_0 == 0) {
 		sql = ("INSERT INTO SCENE (ID, SCENE_NAME,LOCATION,TIME_DATE,GEN_DSCRPT, SCENE_NUM, CHARACTERS, NUM_CRCTRS, NOTES, EXISTS_BOOL) VALUES(" + newdex + ",'" + name + "','" +location + "','" + timeDate + "','"  + description + "',"
 			 + newdex + ",'" + characters + "',"+numChtrs+", '" + notes + "', " + bool_exists + ");");
-		//std::cout << sql << std::endl;
+		std::cout << sql << std::endl;
 	}
 	else if (Update_1_Insert_0 == 1) {
-		sql = ("UPDATE CHARACTER SET NAME = '" + name + "', LOCACTION = '" + location + "',TIME_DATE = '"+timeDate+"' GEN_DSCRPT = '" + description + "', "
+		sql = ("UPDATE SCENE SET SCENE_NAME = '" + name + "', LOCATION = '" + location + "',TIME_DATE = '"+timeDate+"', GEN_DSCRPT = '" + description + "', "
 			"SCENE_NUM = " + sceneNum + ", CHARACTERS = '" + characters + "', NUM_CRCTRS = " +numChtrs+ ", NOTES = '" + notes + "' WHERE ID = " + newdex + ";");
-		//std::cout << sql << std::endl;
+		std::cout << sql << std::endl;
 	}
 	else {
 		std::cout << std::endl << "ERROR Scene SELECTION" << std::endl;
@@ -303,6 +311,28 @@ int sceneCountersWorld(char dbNameString[], int sceneCount, std::string readOrWr
 		std::cerr << "Counter error" << std::endl;
 	}
 	sqlite3_close(db);
+}
+
+int returnNumberChtrsScene(int sceneCount, char dbNameString[])
+{
+	std::string id = std::to_string(sceneCount);
+	std::string sqlRead("SELECT NUM_CRCTRS FROM SCENE WHERE ID = "+id+";");
+	int ret = 0;
+	
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
+	returnCount.clear();
+	exit = sqlite3_exec(db, sqlRead.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
+	errorInsert(exit);
+	
+	Scene conv;
+	ret = conv.convertToInt(returnCount.at(0));
+
+	sqlite3_close(db);
+	returnCount.clear();
+	
+	return ret;
 }
 
 void errorInsert(int exit) {
