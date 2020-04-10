@@ -424,7 +424,7 @@ int main(int argc, char** argv) {
 						//std::stringstream myStream;
 						selectFrom("ID,SCENE_NAME,CHARACTERS,NUM_CRCTRS", "SCENE", sceneCountWorld, 0, dbNameString, true);
 						int idLoadChoice = tempSceneCount = inputInt() - 1;
-						if (idLoadChoice < 0 || idLoadChoice > chaCountWorld) {
+						if (idLoadChoice < 0 || idLoadChoice > sceneCountWorld) {
 							std::cout << "Load Cancelled" << std::endl;
 							break;
 						}
@@ -492,6 +492,8 @@ int main(int argc, char** argv) {
 				std::string sceneList = "";
 				int numScenes = 0;
 				while (exitChapter) {
+					std::cout << "(n)ame, (d)escribe, Assign (num)ber, (v)eiw, (notes), (add scene), "
+						"(save), (load), (rem)ove (scene), (exit)" << std::endl;
 					std::string inputCHPT;
 					std::getline(std::cin, inputCHPT);
 					//Exit Condition
@@ -508,6 +510,10 @@ int main(int argc, char** argv) {
 					}
 					else if (inputCHPT == "notes") {
 						tempChapt.setNotes(inputChtrChoice("Any notes to make about this chapter? "));
+					}
+					else if (inputCHPT == "num") {
+						std::cout << "Please assign a chapter number: ";
+						tempChapt.setChapterNumber(inputInt());
 					}
 					else if (inputCHPT == "v") {
 						printChapterInfo(tempChapt);
@@ -529,24 +535,58 @@ int main(int argc, char** argv) {
 						selectFrom("LOCATION,TIME_DATE,SCENE_NAME,GEN_DSCRPT,NOTES,SCENE_NUM,EXISTS_BOOL", "SCENE", 1, idLoadChoice, dbNameString, false);
 						//Destructor
 						tempScene.~Scene();
-						//Return from selectFrom, adds details to tempchar.
-						//tempChtr.setCharacterFromDb(returnCount);
 						tempScene.setSceneFromDb(returnCount);
 						//Clear return
 						returnCount.clear();
-						
-						//tempScene.setCharacters(tempChtr);
-						tempChapt.setScenes(tempScene);
-						//String representation						
+						tempChapt.setScenes(tempScene);					
 						std::string idToAdd = std::to_string(idLoadChoice) + "N";
 						sceneList += idToAdd;
 						std::cout << sceneList << std::endl;
 						// (?)
-						//numScenes = returnNumberScenesChapter(chaptCountWorld, dbNameString);
+						numScenes = returnNumberScenesChapter(chaptCountWorld, dbNameString);
 						numScenes += 1;
 					}
 					else if (inputCHPT == "rem scene") {
-						std::cout << "Remove" << std::endl;
+						//Remove from load/db
+						if (fromLoad == true) {
+							chaptCountWorld = tempChaptCount + 1;
+							///Who to remove
+							selectFrom("SCENE", "CHAPTER", 1, chaptCountWorld - 1, dbNameString, true);
+							std::cout << "Select Scene ID from list, or -1 to cancel: ";
+							/////HMMMMM!!!!!!!				
+							int idLoadChoice = inputInt();
+							if (idLoadChoice < 0 || idLoadChoice > chaptCountWorld) {
+								std::cout << "removal Cancelled" << std::endl;
+								break;
+							}
+							std::string quickConvert = std::to_string(idLoadChoice);
+							std::string quickConvertNumScenes = "";
+							quickConvert += "N";
+							//Remove from string and update db
+							boost::erase_all(sceneList, quickConvert);
+							updateDb("CHAPTER", "SCENE", sceneList, chaptCountWorld, dbNameString);
+							//Decrement num chtrs
+							int numSceness = returnNumberScenesChapter(chaptCountWorld, dbNameString);
+							numScenes -= 1;
+							quickConvertNumScenes = std::to_string(numScenes);
+							updateDb("CHAPTER", "NUM_SCENES", quickConvertNumScenes, chaptCountWorld, dbNameString);
+							//Reset scene counter (Possibly needless)
+							chaptCountWorld = chapterCountersWorld(dbNameString, 0, "read");
+							break;
+						}
+						//remove from new pre - saved scene
+						else {
+							int rmLim = tempChapt.getSceneList().size();
+							int removeThisEle = 0;
+							for (int rmc = 0; rmc < rmLim; rmc++) {
+								std::cout << rmc << " ";
+								std::cout << tempChapt.getSceneList().at(rmc).getName() << "  ";
+							}
+							std::cout << "Select Scene ID from list, or -1 to cancel: ";
+							removeThisEle = inputInt();
+							tempChapt.removeSceneFromList(removeThisEle);
+							numScenes -= 1;
+						}
 					}
 					else if (inputCHPT == "save") {
 						if (fromLoad == true) {
@@ -556,10 +596,8 @@ int main(int argc, char** argv) {
 						if (tempChapt.getExistence() == false) {
 							tempChapt.setExistence();
 							chaptCountWorld += 1;
-							//insertScene(tempScene, sceneCountWorld, 0, dbNameString, chtrList);
 							insertChapter(tempChapt, chaptCountWorld, 0, dbNameString, sceneList);
 							chapterCountersWorld(dbNameString, chaptCountWorld, "write");
-							//sceneCountersWorld(dbNameString, sceneCountWorld, "write");
 							break; 
 						}
 						//If the character exists, then it is simply updated. Reset chaCountWorld after.
@@ -567,6 +605,63 @@ int main(int argc, char** argv) {
 							insertChapter(tempChapt, chaptCountWorld, 1, dbNameString, sceneList);;
 							sceneCountWorld = sceneCountersWorld(dbNameString, 0, "read");
 							break;
+						}
+					}
+					else if (inputCHPT == "load") {
+						tempChapt.~Chapter();
+						Scene tempSceneChapt;
+						std::vector <std::string> sceneTokens;
+						int tempID = 0;
+						std::string tempScene;
+						sceneList = "";
+						selectFrom("ID,CHPTR_NAME,CHPTR_NUM,NUM_CRCTRS", "CHAPTER", chaptCountWorld, 0, dbNameString, true);
+						int idLoadChoice = tempChaptCount = inputInt() - 1;
+						if (idLoadChoice < 0 || idLoadChoice > chaptCountWorld) {
+							std::cout << "Load Cancelled" << std::endl;
+							break;
+						}
+						//LOAD SCENES//
+						//External from dbInteract.cpp. Returns from callback used in selectFrom if printOnly = false
+						extern std::vector <std::string> returnCount;
+						//Select Return
+						selectFrom("SCENES", "CHAPTER", 1, idLoadChoice, dbNameString, false);
+						std::cout << returnCount.at(0) << std::endl;
+						std::string tempScenesFromReturn = sceneList = returnCount.at(0);
+						returnCount.clear();
+						//Tokenize scene return list
+						boost::char_separator<char> sep("N");
+						boost::tokenizer<boost::char_separator<char>> tokens(tempScenesFromReturn, sep);
+						//Extract SCENES from db, and LOAD to tempSCENE.
+						for (const auto& t : tokens) {
+							std::stringstream myStream(t);
+							myStream >> tempID;
+							tempID -= 1;
+							selectFrom("ID, LOCATION, TIME_DATE, SCENE_NAME, GEN_DSCRPT, NOTES, SCENE_NUM, CHARACTERS, NUM_CRCTRS", "SCENE", 1, tempID, dbNameString, false);
+							tempSceneChapt.setSceneFromDb(returnCount);
+							tempChapt.setScenes(tempSceneChapt);
+							returnCount.clear();
+							tempSceneChapt.~Scene();
+						}
+						//LOAD REST//
+						selectFrom("CHPTR_NUM, CHPTR_NAME, NUM_SCENES, GEN_DSCRPT, NOTES, EXISTS_BOOL", "CHAPTER", 1, idLoadChoice, dbNameString, false);
+						tempChapt.setChapterFromDb(returnCount);
+						returnCount.clear();
+						fromLoad = true;
+					}
+					else if (inputCHPT == "del") {
+					selectFrom("ID,CHPTR_NAME,CHPTR_NUM", "CHAPTER", chaptCountWorld, 0, dbNameString, true);
+					std::cout << "Choose by id. -1 to cancel delete process: " << std::endl;
+					int delChoice = inputInt();
+					if (delChoice < 0 || delChoice > chaptCountWorld) {
+						std::cout << "Load Cancelled" << std::endl;
+						break;
+					}
+					std::cout << delChoice;
+					removeIDFromTable("CHAPTER", delChoice, dbNameString);
+					//Prevent counter from getting out of sync
+						if (delChoice == chaptCountWorld) {
+							chaptCountWorld -= 1;
+							chapterCountersWorld(dbNameString, chaptCountWorld, "write");
 						}
 					}
 				}

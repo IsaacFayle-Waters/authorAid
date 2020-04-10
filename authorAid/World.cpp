@@ -27,4 +27,12 @@ void World::setExistence()
 	}
 }
 
+int World::convertToInt(std::string convert)
+{
+	int returnInt;
+	std::stringstream myStream(convert);
+	myStream >> returnInt;
+	return returnInt;
+}
+
 ;

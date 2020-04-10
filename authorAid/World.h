@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <sstream>
 //In depth look at the world the narrative takes place in.  
 //TODO
 class World
@@ -31,6 +32,7 @@ public:
 	void setExistence();
 	bool getExistence() { return exists; };
 
+	int convertToInt(std::string convert);
 	
 };
 //General information about Places

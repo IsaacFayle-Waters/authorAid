@@ -14,9 +14,6 @@ class Scene: public World
 private:
 	std::string location = "Unkown Location";
 	std::string timeAndOrDate = "Unkown Temporal Space";
-	//std::string sceneName = "Unkown Scene Name";
-	//std::string generalDescription = "Unkown Scene Description";
-	//std::string notes = "No notes";
 	int sceneNumber = -1;
 	std::vector <Character> characters;
 	int numberOfCharacters = 0;
