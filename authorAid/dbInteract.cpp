@@ -133,6 +133,27 @@ void selectFrom(std::string selection, std::string fromTable,int limit, int offs
 	sqlite3_close(db);
 	//return sql;
 }
+void selectFromWhere(std::string selection, std::string fromTable, std::string where, std::string what, char dbNameString[], bool printOnly)
+{
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
+	//SELECT SCENE_NAME, LOCATION, TIME_DATEFROM SCENEWHERE SCENE_NUM = 1;
+	std::string sql = "SELECT " + selection + " FROM " + fromTable + " WHERE " + where + "= " + what + ";";
+	std::cout << sql << std::endl;
+	if (printOnly == true) {
+		exit = sqlite3_exec(db, sql.c_str(), callbackDbPrint, NULL, NULL);
+	}
+	else if (printOnly == false) {
+		returnCount.clear();
+		exit = sqlite3_exec(db, sql.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
+	}
+	else {
+		std::cerr << "ERROR SELECT!" << std::endl;
+	}
+	errorInsert(exit);
+	sqlite3_close(db);
+}
 void updateDb(std::string table, std::string column, std::string value, int id,char dbNameString[])
 {
 	sqlite3* db;
@@ -415,7 +436,7 @@ int returnNumberChtrsScene(int sceneCount, char dbNameString[])
 int returnNumberScenesChapter(int chapterCount, char dbNameString[])
 {
 	std::string id = std::to_string(chapterCount);
-	std::string sqlRead("SELECT SCENE_NUM FROM CHAPTER WHERE ID = " + id + ";");
+	std::string sqlRead("SELECT NUM_SCENES FROM CHAPTER WHERE ID = " + id + ";");
 	int ret = 0;
 
 	sqlite3* db;
@@ -425,7 +446,7 @@ int returnNumberScenesChapter(int chapterCount, char dbNameString[])
 	exit = sqlite3_exec(db, sqlRead.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
 	errorInsert(exit);
 
-	Scene conv;
+	World conv;
 	ret = conv.convertToInt(returnCount.at(0));
 
 	sqlite3_close(db);

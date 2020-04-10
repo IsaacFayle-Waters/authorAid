@@ -14,6 +14,7 @@ void dropT(std::string table, char dbNameString[]);
 void removeIDFromTable(std::string table, int id, char dbNameString[]);
 //select something from table
 void selectFrom(std::string selection, std::string fromTable, int limit, int offset, char dbNameString[], bool printOnly);
+void selectFromWhere(std::string selection, std::string fromTable, std::string where, std::string what, char dbNameString[], bool printOnl);
 //Update values
 void updateDb(std::string table, std::string column, std::string value, int id, char dbNameString[]);
 //Insert new item into table, via specific sql string.

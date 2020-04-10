@@ -84,7 +84,9 @@ int main(int argc, char** argv) {
 	chaptCountWorld = chapterCountersWorld(dbNameString, 0, "read");
 	
 	//updateDb("SCENE", "NUM_CRCTRS", "1", 1, dbNameString);
-    //Create db instance
+	//selectFromWhere("SCENE_NAME, LOCATION, TIME_DATE", "SCENE", "SCENE_NUM", "1", dbNameString, true);
+	
+	//Create db instance
 	sqlite3 *db;
 	//exit deals with sqlite read and write	
 	int exit = 0;
@@ -135,7 +137,7 @@ int main(int argc, char** argv) {
 		while (ui) {
 			//MAIN INPUT//
 			std::string input;
-			std::cout << "Enter an option: (view chtr), (insert chtr), (scene), (exit). " <<std::endl;
+			std::cout << "Enter an option: (view chtr), (insert chtr), (scene), (chapter), (exit). " <<std::endl;
 			std::getline(std::cin, input);
 			//Exit condition//
 			if (input == "exit") {
@@ -520,19 +522,20 @@ int main(int argc, char** argv) {
 					}
 					else if (inputCHPT == "add scene") {
 						Scene tempScene;
-						std::cout << "Select Scene ID from list, or -1 to cancel: ";
-						selectFrom("ID,SCENE_NAME,SCENE_NUM", "SCENE", sceneCountWorld, 0, dbNameString, true);
+						std::cout << "Select Scene Number from list, or -1 to cancel: ";
+						selectFrom("SCENE_NAME, SCENE_NUM", "SCENE", sceneCountWorld, 0, dbNameString, true);
 						//Select Scene by ID number
 						int idLoadChoice = inputInt();
 						if (idLoadChoice < 0 || idLoadChoice > sceneCountWorld) {
 							std::cout << "Load Cancelled" << std::endl;
 							break;
 						}
-
+						std::string choiceString = std::to_string(idLoadChoice);
 						extern std::vector <std::string> returnCount;
 						//Select Return
 						//returnCount.clear();
-						selectFrom("LOCATION,TIME_DATE,SCENE_NAME,GEN_DSCRPT,NOTES,SCENE_NUM,EXISTS_BOOL", "SCENE", 1, idLoadChoice, dbNameString, false);
+						//selectFrom("LOCATION, TIME_DATE, SCENE_NAME, GEN_DSCRPT, NOTES, SCENE_NUM, EXISTS_BOOL", "SCENE", 1, idLoadChoice, dbNameString, false);
+						selectFromWhere("LOCATION, TIME_DATE, SCENE_NAME, GEN_DSCRPT, NOTES, SCENE_NUM, EXISTS_BOOL", "SCENE", "SCENE_NUM", choiceString, dbNameString, false);
 						//Destructor
 						tempScene.~Scene();
 						tempScene.setSceneFromDb(returnCount);
@@ -614,17 +617,18 @@ int main(int argc, char** argv) {
 						int tempID = 0;
 						std::string tempScene;
 						sceneList = "";
-						selectFrom("ID,CHPTR_NAME,CHPTR_NUM,NUM_CRCTRS", "CHAPTER", chaptCountWorld, 0, dbNameString, true);
-						int idLoadChoice = tempChaptCount = inputInt() - 1;
+						selectFrom("CHPTR_NAME,CHPTR_NUM,NUM_SCENES", "CHAPTER", chaptCountWorld, 0, dbNameString, true);
+						int idLoadChoice = tempChaptCount = inputInt();
 						if (idLoadChoice < 0 || idLoadChoice > chaptCountWorld) {
 							std::cout << "Load Cancelled" << std::endl;
 							break;
 						}
+						std::string choiceString = std::to_string(idLoadChoice);
 						//LOAD SCENES//
 						//External from dbInteract.cpp. Returns from callback used in selectFrom if printOnly = false
 						extern std::vector <std::string> returnCount;
 						//Select Return
-						selectFrom("SCENES", "CHAPTER", 1, idLoadChoice, dbNameString, false);
+						selectFromWhere("SCENES", "CHAPTER", "CHPTR_NUM", choiceString, dbNameString, false);
 						std::cout << returnCount.at(0) << std::endl;
 						std::string tempScenesFromReturn = sceneList = returnCount.at(0);
 						returnCount.clear();
@@ -633,17 +637,17 @@ int main(int argc, char** argv) {
 						boost::tokenizer<boost::char_separator<char>> tokens(tempScenesFromReturn, sep);
 						//Extract SCENES from db, and LOAD to tempSCENE.
 						for (const auto& t : tokens) {
-							std::stringstream myStream(t);
-							myStream >> tempID;
-							tempID -= 1;
-							selectFrom("ID, LOCATION, TIME_DATE, SCENE_NAME, GEN_DSCRPT, NOTES, SCENE_NUM, CHARACTERS, NUM_CRCTRS", "SCENE", 1, tempID, dbNameString, false);
+							//std::stringstream myStream(t);
+							//myStream >> tempID;
+							//tempID -= 1;
+							selectFromWhere("LOCATION, TIME_DATE, SCENE_NAME, GEN_DSCRPT, NOTES, SCENE_NUM, NUM_CRCTRS", "SCENE","SCENE_NUM", t, dbNameString, false);
 							tempSceneChapt.setSceneFromDb(returnCount);
 							tempChapt.setScenes(tempSceneChapt);
 							returnCount.clear();
 							tempSceneChapt.~Scene();
 						}
 						//LOAD REST//
-						selectFrom("CHPTR_NUM, CHPTR_NAME, NUM_SCENES, GEN_DSCRPT, NOTES, EXISTS_BOOL", "CHAPTER", 1, idLoadChoice, dbNameString, false);
+						selectFromWhere("CHPTR_NUM, CHPTR_NAME, NUM_SCENES, GEN_DSCRPT, NOTES, EXISTS_BOOL", "CHAPTER","CHPTR_NUM", choiceString,dbNameString, false);
 						tempChapt.setChapterFromDb(returnCount);
 						returnCount.clear();
 						fromLoad = true;
