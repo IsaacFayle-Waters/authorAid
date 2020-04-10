@@ -25,6 +25,7 @@ void Chapter::setScenes(Scene scenes)
 void Chapter::removeSceneFromList(int elementIndex)
 {
 	this->scenes.erase(scenes.begin() + elementIndex);
+	this->numberOfScenes -= 1;
 }
 ;
 std::vector<Scene> Chapter::getSceneList()

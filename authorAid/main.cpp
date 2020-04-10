@@ -46,9 +46,10 @@ void printNarativeGeneralInfo(NarativeGeneralInfo ngi);
 int callback(void* data, int argc, char** argv, char** azColName);//
 void displayAndError(int exit, bool display);//////////////////////
 //////////////////////////////////////////////
-
+std::string removeFromStringList(int idToRemove, std::string stringlist);
 int inputInt();
 std::string inputChtrChoice(std::string message);
+
 //Strings
 std::string data("CALLBACK FUNCTION");
 char dbNameString[] = "counterTest.db";
@@ -110,8 +111,8 @@ int main(int argc, char** argv) {
 	//dropT("CHAPTER", dbNameString);
 	//QUERIES AND TABLE SET UP, TEMPORARY UNTIL SYSTEM MORE ROBUST
 	//tableBaseCreate(dbNameString);
-	//std::string query("UPDATE SCENE SET CHARACTERS = '15N8N14N' WHERE ID=1;");
-	std::string query("ALTER TABLE WORLD ADD COLUMN CHAPT_COUNT INT (0);");
+	std::string query("UPDATE CHAPTER SET NUM_SCENES = 2 WHERE CHPTR_NUM = 4;");
+	//std::string query("ALTER TABLE CHAPTER ADD COLUMN CHAPT_COUNT INT (0);");
 	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
 	//displayAndError(exit,false);
 	//std::string query(removeIDFromTable(5));
@@ -122,6 +123,7 @@ int main(int argc, char** argv) {
 	queryAllFieldsTable("WORLD",dbNameString);
 	queryAllFieldsTable("SCENE", dbNameString);
 	queryAllFieldsTable("CHARACTER", dbNameString);
+	queryAllFieldsTable("CHAPTER", dbNameString);
 	returnThis.clear();
 	identifyThis.clear();
 	displayAndError(exit, true);
@@ -492,6 +494,7 @@ int main(int argc, char** argv) {
 				bool fromLoad = false;
 				int tempChaptCount = 0;
 				std::string sceneList = "";
+				std::vector <int> scenelistForRemovalPurposes;
 				int numScenes = 0;
 				while (exitChapter) {
 					std::cout << "(n)ame, (d)escribe, Assign (num)ber, (v)eiw, (notes), (add scene), "
@@ -541,7 +544,8 @@ int main(int argc, char** argv) {
 						tempScene.setSceneFromDb(returnCount);
 						//Clear return
 						returnCount.clear();
-						tempChapt.setScenes(tempScene);					
+						tempChapt.setScenes(tempScene);			
+						scenelistForRemovalPurposes.push_back(idLoadChoice);
 						std::string idToAdd = std::to_string(idLoadChoice) + "N";
 						sceneList += idToAdd;
 						std::cout << sceneList << std::endl;
@@ -552,13 +556,14 @@ int main(int argc, char** argv) {
 					else if (inputCHPT == "rem scene") {
 						//Remove from load/db
 						if (fromLoad == true) {
-							chaptCountWorld = tempChaptCount + 1;
+							chaptCountWorld = tempChaptCount;
 							///Who to remove
-							selectFrom("SCENE", "CHAPTER", 1, chaptCountWorld - 1, dbNameString, true);
+							std::string chaptStringCount = std::to_string(chaptCountWorld);
+							selectFromWhere("SCENES", "CHAPTER","CHPTR_NUM", chaptStringCount, dbNameString, true);
 							std::cout << "Select Scene ID from list, or -1 to cancel: ";
-							/////HMMMMM!!!!!!!				
+										
 							int idLoadChoice = inputInt();
-							if (idLoadChoice < 0 || idLoadChoice > chaptCountWorld) {
+							if (idLoadChoice < 0 || idLoadChoice > sceneCountWorld) {
 								std::cout << "removal Cancelled" << std::endl;
 								break;
 							}
@@ -567,33 +572,44 @@ int main(int argc, char** argv) {
 							quickConvert += "N";
 							//Remove from string and update db
 							boost::erase_all(sceneList, quickConvert);
-							updateDb("CHAPTER", "SCENE", sceneList, chaptCountWorld, dbNameString);
+							updateDb("CHAPTER", "SCENES", sceneList, chaptCountWorld, dbNameString);
 							//Decrement num chtrs
-							int numSceness = returnNumberScenesChapter(chaptCountWorld, dbNameString);
+							numScenes = returnNumberScenesChapter(chaptCountWorld, dbNameString);
 							numScenes -= 1;
 							quickConvertNumScenes = std::to_string(numScenes);
 							updateDb("CHAPTER", "NUM_SCENES", quickConvertNumScenes, chaptCountWorld, dbNameString);
 							//Reset scene counter (Possibly needless)
-							chaptCountWorld = chapterCountersWorld(dbNameString, 0, "read");
+							//chaptCountWorld = chapterCountersWorld(dbNameString, 0, "read");
 							break;
 						}
 						//remove from new pre - saved scene
 						else {
+							//Get number of scenes
+							
+							//tempChapt.getNumberOfScenes(); <- why not this?
 							int rmLim = tempChapt.getSceneList().size();
 							int removeThisEle = 0;
+							//Display
 							for (int rmc = 0; rmc < rmLim; rmc++) {
 								std::cout << rmc << " ";
 								std::cout << tempChapt.getSceneList().at(rmc).getName() << "  ";
 							}
+							//Choose for dissmissal
 							std::cout << "Select Scene ID from list, or -1 to cancel: ";
 							removeThisEle = inputInt();
+							if (removeThisEle < 0 || removeThisEle > chaptCountWorld) {
+								std::cout << "removal Cancelled" << std::endl;
+								break;
+							}
+							int realPosition = scenelistForRemovalPurposes.at(removeThisEle);
+							sceneList = removeFromStringList(realPosition, sceneList);
 							tempChapt.removeSceneFromList(removeThisEle);
-							numScenes -= 1;
+							std::cout << std::endl;
 						}
 					}
 					else if (inputCHPT == "save") {
 						if (fromLoad == true) {
-							sceneCountWorld = tempChaptCount + 1;
+							chaptCountWorld = tempChaptCount;
 						}
 						//Check existence of scene
 						if (tempChapt.getExistence() == false) {
@@ -603,10 +619,10 @@ int main(int argc, char** argv) {
 							chapterCountersWorld(dbNameString, chaptCountWorld, "write");
 							break; 
 						}
-						//If the character exists, then it is simply updated. Reset chaCountWorld after.
+						//If the chapter exists, then it is simply updated. Reset chaCountWorld after.
 						else if (tempChapt.getExistence() == true) {
 							insertChapter(tempChapt, chaptCountWorld, 1, dbNameString, sceneList);;
-							sceneCountWorld = sceneCountersWorld(dbNameString, 0, "read");
+							chaptCountWorld = chapterCountersWorld(dbNameString, 0, "read");
 							break;
 						}
 					}
@@ -825,6 +841,17 @@ void displayAndError(int exit, bool display)
 		std::cerr << "Error Insert" << std::endl;
 	}
 
+}
+
+std::string removeFromStringList(int idToRemove, std::string stringlist)
+{
+	std::string quickConvert; 
+	quickConvert = std::to_string(idToRemove);
+	//std::string quickConvertNumScenes = "";
+	quickConvert += "N";
+	//Remove from string and update db
+	boost::erase_all(stringlist, quickConvert);
+	return stringlist;
 }
 
 //Safley input integer, and parse.
