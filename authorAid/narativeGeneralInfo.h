@@ -35,6 +35,7 @@ public:
     std::string getGenre() { return genre; };
 
     void setChapter(Chapter chapter);
+    void removeChapterFromList(int elementIndex);
     std::vector<Chapter> getChapters();
     //rem
     int getNumberOfChapters() { return numberOfChapters; };
