@@ -118,8 +118,8 @@ int main(int argc, char** argv) {
 	//dropT("NGI", dbNameString);
 	//QUERIES AND TABLE SET UP, TEMPORARY UNTIL SYSTEM MORE ROBUST
 	//tableBaseCreate(dbNameString);
-	//std::string query("UPDATE CHAPTER SET CHPTR_NUM = 5 WHERE ID = 5;");
-	//std::string query("ALTER TABLE WORLD ADD COLUMN NGI_COUNT INT (0);");
+	//std::string query("UPDATE WORLD SET NGIS = '' WHERE ID = 1;");
+	//std::string query("ALTER TABLE WORLD ADD COLUMN NGIS TEXT;");
 	//exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
 	//displayAndError(exit,false);
 	//std::string query(removeIDFromTable(5));
@@ -854,7 +854,7 @@ int main(int argc, char** argv) {
 						}
 						//If the chapter exists, then it is simply updated. Reset chaCountWorld after.
 						else if (tempNGI.getExistence() == true) {
-							insertNGI(tempNGI, ngiCountWorld, 1, dbNameString, chapterList);;
+							insertNGI(tempNGI, ngiCountWorld, 1, dbNameString, chapterList);
 							ngiCountWorld = ngiCountersWorld(dbNameString, 0, "read");
 							break;
 						}
@@ -917,6 +917,50 @@ int main(int argc, char** argv) {
 						}
 					}
 				}
+			}
+			else if (input == "World") {
+				int exitWorld = 1;
+				//Character class temp
+				World tempWorld;
+				
+				std::string ngiList = "";
+				std::vector <int> ngilistForRemovalPurposes;
+				while (exitWorld) {
+					std::string inputWRLD;
+					std::getline(std::cin, inputWRLD);
+					//Load on entry?
+					//Only really need to save to it, as only one world per file.
+					//Just need to add and remove NGI.
+					//Exit 
+					if (inputWRLD == "exit") {
+						exitWorld = 0;
+						break;
+					}
+					else if (inputWRLD == "n") {
+						tempWorld.setName(inputChtrChoice("Name of series or narative universe. "));
+					}
+					else if (inputWRLD == "d") {
+						tempWorld.setDescription(inputChtrChoice("Describe the universe your strories take place in: "));
+					}
+					else if (inputWRLD == "notes") {
+						tempWorld.setNotes(inputChtrChoice("Notes on the universe your stories inhabit. "));
+					}
+					else if (inputWRLD == "v") {
+						queryAllFieldsTable("WORLD", dbNameString);
+					}
+					else if (inputWRLD == "save") {
+						insertWorld(tempWorld, dbNameString, ngiList);
+						break;
+					}
+					else if (inputWRLD == "add ngi") {
+
+					}
+					else if (inputWRLD == "rem ngi") {
+
+					}
+				
+				}
+
 			}
 		}
 	}

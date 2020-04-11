@@ -30,6 +30,9 @@ void insertScene(Scene scene, int index, int Update_1_Insert_0, char dbNameStrin
 void insertChapter(Chapter chapter, int index, int Update_1_Insert_0, char dbNameString[], std::string sceneList);
 //ngi loader/Updater
 void insertNGI(NarativeGeneralInfo ngi, int index, int Update_1_Insert_0, char dbNameString[], std::string chapterList);
+//Save changes to world
+void insertWorld(World world, char dbNameString[], std::string ngiList);
+
 //Read and write character counter to World
   ///////////
  //COUNTERS/

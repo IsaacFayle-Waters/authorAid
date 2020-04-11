@@ -64,7 +64,8 @@ void tableBaseCreate(char dbNameString[])
 		"NOTES          TEXT         NULL, "
 		"EXISTS_BOOL    INT      NOT NULL, "
 		"CHAPT_COUNT    INT      NOT NULL, "
-		"NGI_COUNT      INT      NOT NULL);"
+		"NGI_COUNT      INT      NOT NULL, "
+		"NGIS           TEXT         NULL);"
 		;
 
 	sqlite3* db;
@@ -353,6 +354,23 @@ void insertNGI(NarativeGeneralInfo ngi, int index, int Update_1_Insert_0, char d
 	exit = sqlite3_exec(db, sql.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
 	errorInsert(exit);
 	sqlite3_close(db);
+}
+void insertWorld(World world, char dbNameString[], std::string ngiList)
+{
+	std::string sql;
+	std::string name = world.getName();
+	std::string description = world.getDescription();
+	std::string notes = world.getNotes();
+
+	sql = ("UPDATE WORLD SET NAME ='"+ name +"', DESCRIPTION = '"+ description +"', NOTES = '"+ notes +"';");
+	std::cout << sql << std::endl;
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
+	exit = sqlite3_exec(db, sql.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
+	errorInsert(exit);
+	sqlite3_close(db);
+
 }
 //Read and write counters from db
 int countersWorld(char dbNameString[],int chaCount, std::string readOrWrite)
