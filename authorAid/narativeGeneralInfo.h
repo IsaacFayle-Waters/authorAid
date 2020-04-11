@@ -34,16 +34,11 @@ public:
     void setGenre(std::string genre);
     std::string getGenre() { return genre; };
 
-    //void setGeneralDescription(std::string generalDescription);
-    //std::string getGeneralDescription() { return genralDescription; };
-
     void setChapter(Chapter chapter);
     std::vector<Chapter> getChapters();
-
+    //rem
     int getNumberOfChapters() { return numberOfChapters; };
-
-    //void setNotes(std::string notes);
-    //std::string getNotes() { return notes; };
+    void setNGIFromDb(std::vector <std::string> dbreturn);
 };
 
 #endif

@@ -63,7 +63,8 @@ void tableBaseCreate(char dbNameString[])
 		"DESCRIPTION    TEXT         NULL, "
 		"NOTES          TEXT         NULL, "
 		"EXISTS_BOOL    INT      NOT NULL, "
-		"CHAPT_COUNT    INT      NOT NULL);"
+		"CHAPT_COUNT    INT      NOT NULL, "
+		"NGI_COUNT      INT      NOT NULL);"
 		;
 
 	sqlite3* db;
@@ -307,7 +308,47 @@ void insertChapter(Chapter chapter, int index, int Update_1_Insert_0, char dbNam
 		std::cout << sql << std::endl;
 	}
 	else {
-		std::cout << std::endl << "ERROR Scene SELECTION" << std::endl;
+		std::cout << std::endl << "ERROR CHAPTER SELECTION" << std::endl;
+	}
+	exit = sqlite3_exec(db, sql.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
+	errorInsert(exit);
+	sqlite3_close(db);
+}
+void insertNGI(NarativeGeneralInfo ngi, int index, int Update_1_Insert_0, char dbNameString[], std::string chapterList)
+{
+	std::string sql;
+
+	std::string newdex = std::to_string(index);
+	std::string title = ngi.getTitle();
+	std::string setting = ngi.getSetting();
+	std::string genre = ngi.getGenre();
+	std::string genDSCRPT = ngi.getDescription(); 
+	std::string chapters = chapterList;
+	int numChaptersInt = ngi.getNumberOfChapters();
+	std::string numChapters = std::to_string(numChaptersInt);
+	std::string notes = ngi.getNotes();
+	bool exists = ngi.getExistence();
+
+	std::string bool_exists = "0";
+	if (exists == true) {
+		bool_exists = "1";
+	}
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
+
+	if (Update_1_Insert_0 == 0) {
+		sql = ("INSERT INTO NGI (ID, TITLE, SETTING, GENRE, GEN_DSCRPT, CHAPTERS, NUM_CHAPTERS, NOTES, EXISTS_BOOL)"
+			"VALUES(" + newdex + ",'" + title + "','" + setting + "','" + genre + "','" + genDSCRPT + "','"+chapters +"',"+numChapters+",'" + notes + "', " + bool_exists + ");");
+		std::cout << sql << std::endl;
+	}
+	else if (Update_1_Insert_0 == 1) {
+		sql = ("UPDATE NGI SET TITLE = '" + title + "', SETTING = '" + setting + "', GENRE = '"+genre+"', CHAPTERS = '" + chapterList + "', NUM_CHAPTERS = " + numChapters + ", GEN_DSCRPT = '" + genDSCRPT + "', "
+			"NOTES = '" + notes + "', EXISTS_BOOL = " + bool_exists + " WHERE ID = " + newdex + ";");
+		std::cout << sql << std::endl;
+	}
+	else {
+		std::cout << std::endl << "ERROR ngi SELECTION" << std::endl;
 	}
 	exit = sqlite3_exec(db, sql.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
 	errorInsert(exit);
@@ -411,6 +452,37 @@ int chapterCountersWorld(char dbNameString[], int chapterCount, std::string read
 
 }
 
+int ngiCountersWorld(char dbNameString[], int ngiCount, std::string readOrWrite)
+{
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
+	std::string ngiCounter = std::to_string(ngiCount);
+	if (readOrWrite == "read") {
+		int ret = 0;
+		returnCount.clear();
+		std::string sqlRead("SELECT NGI_COUNT FROM WORLD;");
+		exit = sqlite3_exec(db, sqlRead.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
+		std::string retCount = returnCount.at(0);
+
+		std::stringstream myStream(retCount);
+		myStream >> ret;
+		returnCount.clear();
+		errorInsert(exit);
+		return ret;
+	}
+	else if (readOrWrite == "write") {
+
+		std::string sqlWrite("UPDATE WORLD SET NGI_COUNT = " + ngiCounter + ";");
+		exit = sqlite3_exec(db, sqlWrite.c_str(), 0, 0, NULL);
+		errorInsert(exit);
+	}
+	else {
+		std::cerr << "Counter error" << std::endl;
+	}
+	sqlite3_close(db);
+}
+
 int returnNumberChtrsScene(int sceneCount, char dbNameString[])
 {
 	std::string id = std::to_string(sceneCount);
@@ -437,6 +509,28 @@ int returnNumberScenesChapter(int chapterCount, char dbNameString[])
 {
 	std::string id = std::to_string(chapterCount);
 	std::string sqlRead("SELECT NUM_SCENES FROM CHAPTER WHERE ID = " + id + ";");
+	int ret = 0;
+
+	sqlite3* db;
+	int exit = 0;
+	exit = sqlite3_open(dbNameString, &db);
+	returnCount.clear();
+	exit = sqlite3_exec(db, sqlRead.c_str(), callbackDbInter, (void*)data2.c_str(), NULL);
+	errorInsert(exit);
+
+	World conv;
+	ret = conv.convertToInt(returnCount.at(0));
+
+	sqlite3_close(db);
+	returnCount.clear();
+
+	return ret;
+}
+
+int returnNumberChaptersNGI(int ngiCount, char dbNameString[])
+{
+	std::string id = std::to_string(ngiCount);
+	std::string sqlRead("SELECT NUM_CHAPTERS FROM NGI WHERE ID = " + id + ";");
 	int ret = 0;
 
 	sqlite3* db;

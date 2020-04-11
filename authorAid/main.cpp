@@ -69,6 +69,7 @@ int chaCount = 0;//OBSOLETE
 int chaCountWorld = 0;
 int sceneCountWorld = 0;
 int chaptCountWorld = 0;
+int ngiCountWorld = 0;
 
 //Used in a display function. Possibly redundent
 int idCount = 0;
@@ -83,9 +84,11 @@ int main(int argc, char** argv) {
 	//Read Counters from World Table
 	//countersWorld(dbNameString, 15, "write");
 	//chapterCountersWorld(dbNameString, 0, "write");
+	//ngiCountersWorld(dbNameString, 1, "write");
 	chaCountWorld = countersWorld(dbNameString, 0, "read");
 	sceneCountWorld = sceneCountersWorld(dbNameString, 0, "read");
 	chaptCountWorld = chapterCountersWorld(dbNameString, 0, "read");
+	ngiCountWorld = ngiCountersWorld(dbNameString, 0, "read");
 	
 	//updateDb("SCENE", "NUM_CRCTRS", "1", 1, dbNameString);
 	//selectFromWhere("SCENE_NAME, LOCATION, TIME_DATE", "SCENE", "SCENE_NUM", "1", dbNameString, true);
@@ -113,9 +116,9 @@ int main(int argc, char** argv) {
 	
 	//dropT("NGI", dbNameString);
 	//QUERIES AND TABLE SET UP, TEMPORARY UNTIL SYSTEM MORE ROBUST
-	tableBaseCreate(dbNameString);
-	//std::string query("UPDATE CHAPTER SET NUM_SCENES = 2 WHERE CHPTR_NUM = 4;");
-	//std::string query("ALTER TABLE CHAPTER ADD COLUMN CHAPT_COUNT INT (0);");
+	//tableBaseCreate(dbNameString);
+	//std::string query("UPDATE CHAPTER SET CHPTR_NUM = 5 WHERE ID = 5;");
+	//std::string query("ALTER TABLE WORLD ADD COLUMN NGI_COUNT INT (0);");
 	//exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
 	//displayAndError(exit,false);
 	//std::string query(removeIDFromTable(5));
@@ -127,6 +130,7 @@ int main(int argc, char** argv) {
 	queryAllFieldsTable("SCENE", dbNameString);
 	queryAllFieldsTable("CHARACTER", dbNameString);
 	queryAllFieldsTable("CHAPTER", dbNameString);
+	queryAllFieldsTable("NGI", dbNameString);
 	returnThis.clear();
 	identifyThis.clear();
 	displayAndError(exit, true);
@@ -142,7 +146,7 @@ int main(int argc, char** argv) {
 		while (ui) {
 			//MAIN INPUT//
 			std::string input;
-			std::cout << "Enter an option: (view chtr), (insert chtr), (scene), (chapter), (exit). " <<std::endl;
+			std::cout << "Enter an option: (view chtr), (insert chtr), (scene), (chapter), (ngi) (exit). " <<std::endl;
 			std::getline(std::cin, input);
 			//Exit condition//
 			if (input == "exit") {
@@ -689,6 +693,9 @@ int main(int argc, char** argv) {
 					}
 				}
 			}
+			//////////////////
+			//Main NGI loop//
+			////////////////
 			else if (input == "ngi") {
 				//exit condition
 				int exitNGI = 1;
@@ -700,6 +707,9 @@ int main(int argc, char** argv) {
 				std::vector <int> chapterlistForRemovalPurposes;
 				int numChapters = 0;
 				while (exitNGI) {
+					std::cout << "(t)itle, (s)etting, (g)enre, (d)escription"
+						"(v)iew, (notes), (add chapter), (rem)ove chapter,"
+						"(save),(load),(del)ete, (exit)" << std::endl;
 					std::string inputNGI;
 					std::getline(std::cin, inputNGI);
 					//Exit Condition
@@ -718,7 +728,7 @@ int main(int argc, char** argv) {
 						tempNGI.setGenre(inputChtrChoice("Genre: "));
 					}
 					else if (inputNGI == "d") {
-						tempNGI.setDescription("Describe the narrative? ");
+						tempNGI.setDescription(inputChtrChoice("Describe the narrative? "));
 					}
 					else if (inputNGI == "notes") {
 						tempNGI.setNotes(inputChtrChoice("Any notes about the story?"));
@@ -727,13 +737,60 @@ int main(int argc, char** argv) {
 						printNarativeGeneralInfo(tempNGI);
 					}
 					else if (inputNGI == "add chapter") {
-
+						Chapter tempChapter;
+						std::cout << "Select Chapter Number from list, or -1 to cancel: ";
+						selectFrom("CHPTR_NAME, CHPTR_NUM", "CHAPTER", chaptCountWorld, 0, dbNameString, true);
+						//Select chapter by ID number
+						int idLoadChoice = inputInt();
+						if (idLoadChoice < 0 || idLoadChoice > chaptCountWorld) {
+							std::cout << "Load Cancelled" << std::endl;
+							break;
+						}
+						std::string choiceString = std::to_string(idLoadChoice);
+						extern std::vector <std::string> returnCount;
+						//CHPTR_NUM, CHPTR_NAME, NUM_SCENES, GEN_DSCRPT, NOTES, EXISTS_BOOL
+						selectFromWhere("CHPTR_NUM, CHPTR_NAME, NUM_SCENES, GEN_DSCRPT, NOTES, EXISTS_BOOL", "CHAPTER", "CHPTR_NUM", choiceString, dbNameString, false);
+						//Destructor
+						tempChapter.~Chapter();
+						tempChapter.setChapterFromDb(returnCount);
+						
+						//Clear return
+						returnCount.clear();
+						tempNGI.setChapter(tempChapter);
+						chapterlistForRemovalPurposes.push_back(idLoadChoice);
+						std::string idToAdd = std::to_string(idLoadChoice) + "N";
+						chapterList += idToAdd;
+						std::cout << chapterList << std::endl;
+						//Remove when ready to use
+						try {
+							numChapters = returnNumberChaptersNGI(ngiCountWorld, dbNameString);
+							numChapters += 1;
+						}
+						catch (std::out_of_range e) {
+							std::cout << "NOT USABLE YET. NEEDS SAVED NGI TABLE." << std::endl;
+						}
 					}
 					else if (inputNGI == "rem chapter") {
 
 					}
 					else if (inputNGI == "save") {
-
+						if (fromLoad == true) {
+							ngiCountWorld = tempNGICount;
+						}
+						//Check existence of scene
+						if (tempNGI.getExistence() == false) {
+							tempNGI.setExistence();
+							ngiCountWorld += 1;
+							insertNGI(tempNGI, ngiCountWorld, 0, dbNameString, chapterList);
+							ngiCountersWorld(dbNameString, ngiCountWorld, "write");
+							break;
+						}
+						//If the chapter exists, then it is simply updated. Reset chaCountWorld after.
+						else if (tempNGI.getExistence() == true) {
+							insertNGI(tempNGI, ngiCountWorld, 1, dbNameString, chapterList);;
+							ngiCountWorld = ngiCountersWorld(dbNameString, 0, "read");
+							break;
+						}
 					}
 					else if (inputNGI == "load") {
 

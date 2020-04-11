@@ -26,10 +26,7 @@ void NarativeGeneralInfo::setGenre(std::string genre)
 {
 	this->genre = genre;
 };
-/*void NarativeGeneralInfo::setGeneralDescription(std::string generalDescription)
-{
-	this->genralDescription = generalDescription;
-}*/
+
 void NarativeGeneralInfo::setChapter(Chapter chapter)
 {
 	this->chapter.push_back(chapter);
@@ -39,8 +36,10 @@ std::vector<Chapter> NarativeGeneralInfo::getChapters()
 {
 	return chapter;
 };
-/*void NarativeGeneralInfo::setNotes(std::string notes)
+void NarativeGeneralInfo::setNGIFromDb(std::vector<std::string> dbreturn)
 {
-	this->notes = notes;
-};*/
+	//
+	
+};
+
 ;
