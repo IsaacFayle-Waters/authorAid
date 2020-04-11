@@ -21,6 +21,7 @@ private:
     //array of Other characters linked to 'this' character. Possibly
 public:
     NarativeGeneralInfo();
+    ~NarativeGeneralInfo();
     NarativeGeneralInfo(std::string title, std::string setting,
         std::string genre, std::string genralDescription);
     

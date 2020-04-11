@@ -49,7 +49,7 @@ void tableBaseCreate(char dbNameString[])
 		"SETTING		TEXT		 NULL, "
 		"GENRE			TEXT		 NULL, "
 		"GEN_DSCRPT		TEXT		 NULL, "
-		"CHAPTERS		BLOB		 NULL, "
+		"CHAPTERS		TEXT		 NULL, "
 		"NUM_CHAPTERS   INT		 NOT NULL, "
 		"NOTES			TEXT		 NULL, "
 		"EXISTS_BOOL    INT      NOT NULL);"

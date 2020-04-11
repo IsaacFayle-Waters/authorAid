@@ -15,6 +15,9 @@
 
 //TODO DEBUG insert chtr. Load and update possible problems
 //TODO need to find a way to safley delete from db. Update changes yet keep relations.
+//One possible soloution is similar to the set up in chapter, where chapter number is assigned manually (TODO Needs automation).
+//The result is a record of a chapters own identity other than the rowId. Seems to help to search by this value instead? 
+//Unless this is due to more robust selection process'.
 
 //TODO File handeling
 //TODO eof completion check table. Possiblly better to wait for a while.
@@ -108,12 +111,12 @@ int main(int argc, char** argv) {
 		exit = sqlite3_open(dbNameString2, &db);
 	}
 	
-	//dropT("CHAPTER", dbNameString);
+	//dropT("NGI", dbNameString);
 	//QUERIES AND TABLE SET UP, TEMPORARY UNTIL SYSTEM MORE ROBUST
-	//tableBaseCreate(dbNameString);
-	std::string query("UPDATE CHAPTER SET NUM_SCENES = 2 WHERE CHPTR_NUM = 4;");
+	tableBaseCreate(dbNameString);
+	//std::string query("UPDATE CHAPTER SET NUM_SCENES = 2 WHERE CHPTR_NUM = 4;");
 	//std::string query("ALTER TABLE CHAPTER ADD COLUMN CHAPT_COUNT INT (0);");
-	exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
+	//exit = sqlite3_exec(db, query.c_str(), callback, NULL, NULL);
 	//displayAndError(exit,false);
 	//std::string query(removeIDFromTable(5));
 	//exit = sqlite3_exec(db, create.c_str(), callback, (void*)data.c_str(), NULL);
@@ -498,7 +501,7 @@ int main(int argc, char** argv) {
 				int numScenes = 0;
 				while (exitChapter) {
 					std::cout << "(n)ame, (d)escribe, Assign (num)ber, (v)eiw, (notes), (add scene), "
-						"(save), (load), (rem)ove (scene), (exit)" << std::endl;
+						"(save), (load), (rem)ove (scene),(del)ete (exit)" << std::endl;
 					std::string inputCHPT;
 					std::getline(std::cin, inputCHPT);
 					//Exit Condition
@@ -683,6 +686,60 @@ int main(int argc, char** argv) {
 							chaptCountWorld -= 1;
 							chapterCountersWorld(dbNameString, chaptCountWorld, "write");
 						}
+					}
+				}
+			}
+			else if (input == "ngi") {
+				//exit condition
+				int exitNGI = 1;
+				//Character class temp
+				NarativeGeneralInfo tempNGI;
+				bool fromLoad = false;
+				int tempNGICount = 0;
+				std::string chapterList = "";
+				std::vector <int> chapterlistForRemovalPurposes;
+				int numChapters = 0;
+				while (exitNGI) {
+					std::string inputNGI;
+					std::getline(std::cin, inputNGI);
+					//Exit Condition
+					if (inputNGI == "exit") {
+						exitNGI= 0;
+						tempNGI.~NarativeGeneralInfo();
+						break;
+					}
+					else if (inputNGI == "t") {
+						tempNGI.setTitle(inputChtrChoice("Tack on a title to the tale? "));
+					}
+					else if (inputNGI == "s") {
+						tempNGI.setSetting(inputChtrChoice("Set Setting: "));
+					}
+					else if (inputNGI == "g") {
+						tempNGI.setGenre(inputChtrChoice("Genre: "));
+					}
+					else if (inputNGI == "d") {
+						tempNGI.setDescription("Describe the narrative? ");
+					}
+					else if (inputNGI == "notes") {
+						tempNGI.setNotes(inputChtrChoice("Any notes about the story?"));
+					}
+					else if (inputNGI == "v") {
+						printNarativeGeneralInfo(tempNGI);
+					}
+					else if (inputNGI == "add chapter") {
+
+					}
+					else if (inputNGI == "rem chapter") {
+
+					}
+					else if (inputNGI == "save") {
+
+					}
+					else if (inputNGI == "load") {
+
+					}
+					else if (inputNGI == "del") {
+
 					}
 				}
 			}
@@ -961,8 +1018,12 @@ void printNarativeGeneralInfo(NarativeGeneralInfo ngi)
 	std::cout << ngi.getTitle() << std::endl;
 	std::cout << "Setting: ";
 	std::cout << ngi.getSetting() << std::endl;
+	std::cout << "Genre: ";
+	std::cout << ngi.getGenre() << std::endl;
 	std::cout << "Description: ";
 	std::cout << ngi.getDescription() << std::endl;
+	std::cout << "Notes: ";
+	std::cout << ngi.getNotes() << std::endl;
 	std::cout << "Number of Chapters: ";
 	std::cout << ngi.getNumberOfChapters();
 	std::cout << std::endl << std::endl;

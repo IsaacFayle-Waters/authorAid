@@ -2,6 +2,10 @@
 
 NarativeGeneralInfo::NarativeGeneralInfo() = default;
 
+NarativeGeneralInfo::~NarativeGeneralInfo()
+{
+};
+
 NarativeGeneralInfo::NarativeGeneralInfo(std::string title, std::string setting, std::string genre, std::string genralDescription)
 {
 	setTitle(title);
