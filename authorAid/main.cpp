@@ -930,8 +930,10 @@ int main(int argc, char** argv) {
 					std::getline(std::cin, inputWRLD);
 					//Load on entry?
 					//Only really need to save to it, as only one world per file.
-					//Just need to add and remove NGI.
-					//Exit 
+					//Just need to add and remove NGI. Actually, that is achieved withing the creation and deletion of NGI, so not necesarry.
+					//Only need to view ngi's
+				
+					//Exit Condition. 
 					if (inputWRLD == "exit") {
 						exitWorld = 0;
 						break;
@@ -947,16 +949,19 @@ int main(int argc, char** argv) {
 					}
 					else if (inputWRLD == "v") {
 						queryAllFieldsTable("WORLD", dbNameString);
+						std::cout << "Include in this world are the following narratives: " << std::endl;
+						queryAllFieldsTable("NGI", dbNameString);
 					}
 					else if (inputWRLD == "save") {
 						insertWorld(tempWorld, dbNameString, ngiList);
 						break;
 					}
-					else if (inputWRLD == "add ngi") {
-
+					else if (inputWRLD == "add ngi") {///NOT NEEDED
+						//Should be Automatic, see below.
 					}
-					else if (inputWRLD == "rem ngi") {
-
+					else if (inputWRLD == "rem ngi") {///NOT NEEDED
+						//No need? As ngi is the last level of class that has multiplicity in this system, 
+						//within the confines of each seperate world/file. 
 					}
 				
 				}
