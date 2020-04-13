@@ -45,6 +45,7 @@ void Scene::removeCharacterFromList(int elementIndex)
 {
 	
 	this->characters.erase(characters.begin() + elementIndex);
+	this->numberOfCharacters -= 1;
 }
 
 void Scene::setSceneFromDb(std::vector<std::string> dbreturn)
